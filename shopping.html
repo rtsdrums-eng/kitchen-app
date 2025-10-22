@@ -442,7 +442,7 @@
         <h1>🛒 Shopping List</h1>
 
         <div class="add-list-container">
-            <button class="add-list-btn" onclick="addNewList()">+ Add New Store List</button>
+            <button class="add-list-btn" onclick="window.addNewList()">+ Add New Store List</button>
         </div>
 
         <div class="grid" id="lists-container">
@@ -457,11 +457,31 @@
 
         <div id="undo-toast" class="undo-toast">
             <span class="undo-toast-message" id="undo-message"></span>
-            <button class="undo-btn" onclick="performUndo()">Undo</button>
+            <button class="undo-btn" onclick="window.performUndo()">Undo</button>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
+            authDomain: "kitchen-app-48dfd.firebaseapp.com",
+            projectId: "kitchen-app-48dfd",
+            storageBucket: "kitchen-app-48dfd.firebasestorage.app",
+            messagingSenderId: "1085782615169",
+            appId: "1:1085782615169:web:c13f6604456b9f221c9980",
+            measurementId: "G-5QM7PRV02K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let householdId = null;
+
         // Default store configurations
         const defaultStores = [
             { id: 'heb', name: 'H-E-B', emoji: '🏪' },
@@ -469,16 +489,71 @@
             { id: 'other', name: 'Other Stores', emoji: '🏪' }
         ];
 
-        // Load data from localStorage
-        let stores = JSON.parse(localStorage.getItem('shopping-stores')) || defaultStores;
-        let storeOrder = JSON.parse(localStorage.getItem('shopping-store-order')) || stores.map(s => s.id);
+        // Shopping data
+        let stores = defaultStores;
+        let storeOrder = stores.map(s => s.id);
         let shoppingList = {};
-        let purchased = JSON.parse(localStorage.getItem('shopping-purchased')) || [];
+        let purchased = [];
 
-        // Load shopping lists for each store
+        // Initialize shopping lists for each store
         stores.forEach(store => {
-            shoppingList[store.id] = JSON.parse(localStorage.getItem(`shopping-${store.id}`)) || [];
+            shoppingList[store.id] = [];
         });
+
+        // Check authentication and load data
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                householdId = userDoc.data().householdId;
+                loadShoppingDataFromFirebase();
+            }
+        });
+
+        // Load shopping data from Firebase with real-time sync
+        function loadShoppingDataFromFirebase() {
+            const shoppingRef = doc(db, 'households', householdId, 'data', 'shopping');
+
+            onSnapshot(shoppingRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    if (data.stores) stores = data.stores;
+                    if (data.storeOrder) storeOrder = data.storeOrder;
+                    if (data.shoppingList) shoppingList = data.shoppingList;
+                    if (data.purchased) purchased = data.purchased;
+                } else {
+                    // Initialize with defaults if no data exists
+                    stores = defaultStores;
+                    storeOrder = stores.map(s => s.id);
+                    shoppingList = {};
+                    stores.forEach(store => {
+                        shoppingList[store.id] = [];
+                    });
+                    purchased = [];
+                }
+
+                renderAllLists();
+                renderPurchased();
+            });
+        }
+
+        // Save shopping data to Firebase
+        async function saveShoppingDataToFirebase() {
+            if (!householdId) return;
+
+            const shoppingRef = doc(db, 'households', householdId, 'data', 'shopping');
+            await setDoc(shoppingRef, {
+                stores,
+                storeOrder,
+                shoppingList,
+                purchased
+            });
+        }
 
         // Undo functionality
         let undoStack = null;
@@ -501,12 +576,13 @@
             undoStack = null;
         }
 
-        function performUndo() {
+        async function performUndo() {
             if (undoStack) {
-                undoStack();
+                await undoStack();
                 hideUndo();
             }
         }
+        window.performUndo = performUndo;
 
         // Drag and drop variables for items
         let draggedItem = null;
@@ -518,7 +594,7 @@
         let draggedSectionId = null;
 
         // Add new store list
-        function addNewList() {
+        async function addNewList() {
             const name = prompt('Enter store name:');
             if (name && name.trim()) {
                 const id = 'store_' + Date.now();
@@ -527,26 +603,26 @@
                 storeOrder.push(id);
                 shoppingList[id] = [];
 
-                saveStores();
-                renderAllLists();
+                await saveShoppingDataToFirebase();
             }
         }
+        window.addNewList = addNewList;
 
         // Rename store
-        function renameStore(storeId) {
+        async function renameStore(storeId) {
             const store = stores.find(s => s.id === storeId);
             if (store) {
                 const newName = prompt('Enter new name:', store.name);
                 if (newName && newName.trim()) {
                     store.name = newName.trim();
-                    saveStores();
-                    renderAllLists();
+                    await saveShoppingDataToFirebase();
                 }
             }
         }
+        window.renameStore = renameStore;
 
         // Delete store
-        function deleteStore(storeId) {
+        async function deleteStore(storeId) {
             const store = stores.find(s => s.id === storeId);
             if (store) {
                 if (confirm(`Delete "${store.name}" and all its items?`)) {
@@ -557,64 +633,48 @@
                     stores = stores.filter(s => s.id !== storeId);
                     storeOrder = storeOrder.filter(id => id !== storeId);
                     delete shoppingList[storeId];
-                    localStorage.removeItem(`shopping-${storeId}`);
 
-                    saveStores();
-                    renderAllLists();
+                    await saveShoppingDataToFirebase();
 
-                    showUndo(`Deleted "${deletedStore.name}"`, () => {
+                    showUndo(`Deleted "${deletedStore.name}"`, async () => {
                         stores.splice(deletedIndex, 0, deletedStore);
                         storeOrder.splice(deletedIndex, 0, storeId);
                         shoppingList[storeId] = deletedItems;
-                        localStorage.setItem(`shopping-${storeId}`, JSON.stringify(deletedItems));
-                        saveStores();
-                        renderAllLists();
+                        await saveShoppingDataToFirebase();
                     });
                 }
             }
         }
-
-        // Save stores configuration
-        function saveStores() {
-            localStorage.setItem('shopping-stores', JSON.stringify(stores));
-            localStorage.setItem('shopping-store-order', JSON.stringify(storeOrder));
-        }
-
-        // Initialize the page
-        function init() {
-            renderAllLists();
-            renderPurchased();
-        }
+        window.deleteStore = deleteStore;
 
         // Add item to a section
-        function addItem(storeId) {
+        async function addItem(storeId) {
             const input = document.getElementById(`${storeId}-input`);
             const item = input.value.trim();
 
             if (item) {
                 shoppingList[storeId].push(item);
-                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                await saveShoppingDataToFirebase();
                 input.value = '';
-                renderSection(storeId);
             }
         }
+        window.addItem = addItem;
 
         // Delete item from a section
-        function deleteItem(storeId, index) {
+        async function deleteItem(storeId, index) {
             const deletedItem = shoppingList[storeId][index];
             shoppingList[storeId].splice(index, 1);
-            localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-            renderSection(storeId);
+            await saveShoppingDataToFirebase();
 
-            showUndo(`Deleted "${deletedItem}"`, () => {
+            showUndo(`Deleted "${deletedItem}"`, async () => {
                 shoppingList[storeId].splice(index, 0, deletedItem);
-                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-                renderSection(storeId);
+                await saveShoppingDataToFirebase();
             });
         }
+        window.deleteItem = deleteItem;
 
         // Check item (move to purchased)
-        function checkItem(storeId, index) {
+        async function checkItem(storeId, index) {
             const item = shoppingList[storeId][index];
             const store = stores.find(s => s.id === storeId);
             const purchasedItem = {
@@ -627,38 +687,31 @@
             shoppingList[storeId].splice(index, 1);
             purchased.unshift(purchasedItem);
 
-            localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-            localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+            await saveShoppingDataToFirebase();
 
-            renderSection(storeId);
-            renderPurchased();
-
-            showUndo(`Marked "${item}" as purchased`, () => {
+            showUndo(`Marked "${item}" as purchased`, async () => {
                 purchased.shift();
                 shoppingList[storeId].splice(index, 0, item);
-                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-                localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
-                renderSection(storeId);
-                renderPurchased();
+                await saveShoppingDataToFirebase();
             });
         }
+        window.checkItem = checkItem;
 
         // Delete purchased item
-        function deletePurchased(index) {
+        async function deletePurchased(index) {
             const deletedItem = purchased[index];
             purchased.splice(index, 1);
-            localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
-            renderPurchased();
+            await saveShoppingDataToFirebase();
 
-            showUndo(`Deleted "${deletedItem.name}"`, () => {
+            showUndo(`Deleted "${deletedItem.name}"`, async () => {
                 purchased.splice(index, 0, deletedItem);
-                localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
-                renderPurchased();
+                await saveShoppingDataToFirebase();
             });
         }
+        window.deletePurchased = deletePurchased;
 
         // Buy again - add item back to original store list
-        function buyAgain(index) {
+        async function buyAgain(index) {
             const item = purchased[index];
             const storeId = item.storeId;
 
@@ -671,25 +724,19 @@
             shoppingList[storeId].push(item.name);
             purchased.splice(index, 1);
 
-            localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-            localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+            await saveShoppingDataToFirebase();
 
-            renderSection(storeId);
-            renderPurchased();
-
-            showUndo(`Added "${item.name}" back to ${item.storeName}`, () => {
+            showUndo(`Added "${item.name}" back to ${item.storeName}`, async () => {
                 const lastIndex = shoppingList[storeId].length - 1;
                 shoppingList[storeId].splice(lastIndex, 1);
                 purchased.splice(index, 0, item);
-                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-                localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
-                renderSection(storeId);
-                renderPurchased();
+                await saveShoppingDataToFirebase();
             });
         }
+        window.buyAgain = buyAgain;
 
         // Clear entire section
-        function clearSection(storeId) {
+        async function clearSection(storeId) {
             if (shoppingList[storeId].length === 0) return;
 
             const store = stores.find(s => s.id === storeId);
@@ -698,16 +745,15 @@
                 const itemCount = clearedItems.length;
 
                 shoppingList[storeId] = [];
-                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-                renderSection(storeId);
+                await saveShoppingDataToFirebase();
 
-                showUndo(`Cleared ${itemCount} item${itemCount > 1 ? 's' : ''} from ${store.name}`, () => {
+                showUndo(`Cleared ${itemCount} item${itemCount > 1 ? 's' : ''} from ${store.name}`, async () => {
                     shoppingList[storeId] = clearedItems;
-                    localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-                    renderSection(storeId);
+                    await saveShoppingDataToFirebase();
                 });
             }
         }
+        window.clearSection = clearSection;
 
         // Drag and drop handlers for items
         function handleDragStart(e, storeId, index) {
@@ -717,6 +763,7 @@
             e.target.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
         }
+        window.handleDragStart = handleDragStart;
 
         function handleDragOver(e) {
             if (e.preventDefault) {
@@ -725,20 +772,23 @@
             e.dataTransfer.dropEffect = 'move';
             return false;
         }
+        window.handleDragOver = handleDragOver;
 
         function handleDragEnter(e) {
             if (e.target.tagName === 'LI' && !e.target.classList.contains('dragging')) {
                 e.target.style.borderTop = '2px solid var(--orange)';
             }
         }
+        window.handleDragEnter = handleDragEnter;
 
         function handleDragLeave(e) {
             if (e.target.tagName === 'LI') {
                 e.target.style.borderTop = '';
             }
         }
+        window.handleDragLeave = handleDragLeave;
 
-        function handleDrop(e, storeId, dropIndex) {
+        async function handleDrop(e, storeId, dropIndex) {
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
@@ -755,12 +805,12 @@
                     shoppingList[storeId].splice(dropIndex, 0, item);
                 }
 
-                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
-                renderSection(storeId);
+                await saveShoppingDataToFirebase();
             }
 
             return false;
         }
+        window.handleDrop = handleDrop;
 
         function handleDragEnd(e) {
             e.target.classList.remove('dragging');
@@ -768,6 +818,7 @@
                 item.style.borderTop = '';
             });
         }
+        window.handleDragEnd = handleDragEnd;
 
         // Drag and drop handlers for sections
         function handleSectionDragStart(e, storeId) {
@@ -776,6 +827,7 @@
             e.currentTarget.classList.add('dragging-section');
             e.dataTransfer.effectAllowed = 'move';
         }
+        window.handleSectionDragStart = handleSectionDragStart;
 
         function handleSectionDragOver(e) {
             if (e.preventDefault) {
@@ -784,6 +836,7 @@
             e.dataTransfer.dropEffect = 'move';
             return false;
         }
+        window.handleSectionDragOver = handleSectionDragOver;
 
         function handleSectionDragEnter(e) {
             const section = e.currentTarget;
@@ -791,6 +844,7 @@
                 section.style.borderLeft = '4px solid var(--orange)';
             }
         }
+        window.handleSectionDragEnter = handleSectionDragEnter;
 
         function handleSectionDragLeave(e) {
             const section = e.currentTarget;
@@ -798,8 +852,9 @@
                 section.style.borderLeft = '';
             }
         }
+        window.handleSectionDragLeave = handleSectionDragLeave;
 
-        function handleSectionDrop(e, dropStoreId) {
+        async function handleSectionDrop(e, dropStoreId) {
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
@@ -814,12 +869,12 @@
                 storeOrder.splice(draggedIdx, 1);
                 storeOrder.splice(dropIdx, 0, draggedSectionId);
 
-                saveStores();
-                renderAllLists();
+                await saveShoppingDataToFirebase();
             }
 
             return false;
         }
+        window.handleSectionDrop = handleSectionDrop;
 
         function handleSectionDragEnd(e) {
             e.currentTarget.classList.remove('dragging-section');
@@ -827,6 +882,7 @@
                 section.style.borderLeft = '';
             });
         }
+        window.handleSectionDragEnd = handleSectionDragEnd;
 
         // Render a specific section
         function renderSection(storeId) {
@@ -841,19 +897,19 @@
             } else {
                 list.innerHTML = shoppingList[storeId].map((item, index) => `
                     <li draggable="true"
-                        ondragstart="handleDragStart(event, '${storeId}', ${index})"
-                        ondragover="handleDragOver(event)"
-                        ondragenter="handleDragEnter(event)"
-                        ondragleave="handleDragLeave(event)"
-                        ondrop="handleDrop(event, '${storeId}', ${index})"
-                        ondragend="handleDragEnd(event)">
+                        ondragstart="window.handleDragStart(event, '${storeId}', ${index})"
+                        ondragover="window.handleDragOver(event)"
+                        ondragenter="window.handleDragEnter(event)"
+                        ondragleave="window.handleDragLeave(event)"
+                        ondrop="window.handleDrop(event, '${storeId}', ${index})"
+                        ondragend="window.handleDragEnd(event)">
                         <div class="item-content">
                             <span class="drag-handle">☰</span>
-                            <input type="checkbox" class="item-checkbox" onchange="checkItem('${storeId}', ${index})">
+                            <input type="checkbox" class="item-checkbox" onchange="window.checkItem('${storeId}', ${index})">
                             <span class="item-text">${item}</span>
                         </div>
                         <div class="item-buttons">
-                            <button class="delete-btn" onclick="deleteItem('${storeId}', ${index})" title="Delete">🗑️</button>
+                            <button class="delete-btn" onclick="window.deleteItem('${storeId}', ${index})" title="Delete">🗑️</button>
                         </div>
                     </li>
                 `).join('');
@@ -886,16 +942,16 @@
                             <h2>${store.emoji} ${store.name}</h2>
                         </div>
                         <div class="section-actions">
-                            <button class="rename-btn" onclick="renameStore('${storeId}')" title="Rename">✏️</button>
-                            <button class="delete-list-btn" onclick="deleteStore('${storeId}')" title="Delete">🗑️</button>
+                            <button class="rename-btn" onclick="window.renameStore('${storeId}')" title="Rename">✏️</button>
+                            <button class="delete-list-btn" onclick="window.deleteStore('${storeId}')" title="Delete">🗑️</button>
                         </div>
                     </div>
                     <div class="input-group">
                         <input type="text" id="${storeId}-input" placeholder="Add item...">
-                        <button class="add-btn" onclick="addItem('${storeId}')">Add</button>
+                        <button class="add-btn" onclick="window.addItem('${storeId}')">Add</button>
                     </div>
                     <ul id="${storeId}-list"></ul>
-                    <a href="#" class="clear-link" id="${storeId}-clear" onclick="clearSection('${storeId}'); return false;">clear all items</a>
+                    <a href="#" class="clear-link" id="${storeId}-clear" onclick="window.clearSection('${storeId}'); return false;">clear all items</a>
                 `;
 
                 container.appendChild(section);
@@ -931,17 +987,14 @@
                                 <span class="purchased-date">Purchased on ${formattedDate}</span>
                             </div>
                             <div class="item-buttons">
-                                <button class="buy-again-btn" onclick="buyAgain(${index})">Buy Again</button>
-                                <button class="delete-btn" onclick="deletePurchased(${index})" title="Delete">🗑️</button>
+                                <button class="buy-again-btn" onclick="window.buyAgain(${index})">Buy Again</button>
+                                <button class="delete-btn" onclick="window.deletePurchased(${index})" title="Delete">🗑️</button>
                             </div>
                         </li>
                     `;
                 }).join('');
             }
         }
-
-        // Initialize on page load
-        init();
     </script>
 </body>
 </html>

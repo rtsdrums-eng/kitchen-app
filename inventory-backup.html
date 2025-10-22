@@ -429,7 +429,7 @@
                     <button class="add-btn" onclick="addItem('fridge')">Add</button>
                 </div>
                 <ul id="fridge-list"></ul>
-                <a href="#" class="clear-link" id="fridge-clear" onclick="window.clearSection('fridge'); return false;">clear all items</a>
+                <a href="#" class="clear-link" id="fridge-clear" onclick="clearSection('fridge'); return false;">clear all items</a>
             </div>
 
             <div class="section freezer">
@@ -439,7 +439,7 @@
                     <button class="add-btn" onclick="addItem('freezer')">Add</button>
                 </div>
                 <ul id="freezer-list"></ul>
-                <a href="#" class="clear-link" id="freezer-clear" onclick="window.clearSection('freezer'); return false;">clear all items</a>
+                <a href="#" class="clear-link" id="freezer-clear" onclick="clearSection('freezer'); return false;">clear all items</a>
             </div>
 
             <div class="section pantry">
@@ -449,7 +449,7 @@
                     <button class="add-btn" onclick="addItem('pantry')">Add</button>
                 </div>
                 <ul id="pantry-list"></ul>
-                <a href="#" class="clear-link" id="pantry-clear" onclick="window.clearSection('pantry'); return false;">clear all items</a>
+                <a href="#" class="clear-link" id="pantry-clear" onclick="clearSection('pantry'); return false;">clear all items</a>
             </div>
 
             <div class="section spices">
@@ -459,7 +459,7 @@
                     <button class="add-btn" onclick="addItem('spices')">Add</button>
                 </div>
                 <ul id="spices-list"></ul>
-                <a href="#" class="clear-link" id="spices-clear" onclick="window.clearSection('spices'); return false;">clear all items</a>
+                <a href="#" class="clear-link" id="spices-clear" onclick="clearSection('spices'); return false;">clear all items</a>
             </div>
         </div>
 
@@ -469,31 +469,13 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
-            authDomain: "kitchen-app-48dfd.firebaseapp.com",
-            projectId: "kitchen-app-48dfd",
-            storageBucket: "kitchen-app-48dfd.firebasestorage.app",
-            messagingSenderId: "1085782615169",
-            appId: "1:1085782615169:web:c13f6604456b9f221c9980",
-            measurementId: "G-5QM7PRV02K"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let householdId = null;
+    <script>
+        // Load data from localStorage
         let inventory = {
-            fridge: [],
-            freezer: [],
-            pantry: [],
-            spices: []
+            fridge: JSON.parse(localStorage.getItem('fridge')) || [],
+            freezer: JSON.parse(localStorage.getItem('freezer')) || [],
+            pantry: JSON.parse(localStorage.getItem('pantry')) || [],
+            spices: JSON.parse(localStorage.getItem('spices')) || []
         };
 
         // Undo functionality
@@ -531,90 +513,32 @@
             }
         }
 
-        // Check authentication and load data
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
+        // Initialize the page
+        function init() {
+            renderAll();
+            updateStats();
 
-            // Get user's household ID
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-                householdId = userDoc.data().householdId;
-                loadInventoryFromFirebase();
-            } else {
-                alert('User data not found. Please contact support.');
-            }
-        });
-
-        // Load inventory from Firebase and listen for changes
-        function loadInventoryFromFirebase() {
-            const inventoryRef = doc(db, 'households', householdId, 'data', 'inventory');
-
-            // Listen for real-time updates
-            onSnapshot(inventoryRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    inventory = {
-                        fridge: data.fridge || [],
-                        freezer: data.freezer || [],
-                        pantry: data.pantry || [],
-                        spices: data.spices || []
-                    };
-                } else {
-                    // Initialize empty inventory
-                    inventory = {
-                        fridge: [],
-                        freezer: [],
-                        pantry: [],
-                        spices: []
-                    };
-                }
-                renderAll();
-                updateStats();
-                initializeInputs();
-            });
-        }
-
-        // Save inventory to Firebase
-        async function saveInventoryToFirebase() {
-            if (!householdId) return;
-
-            try {
-                const inventoryRef = doc(db, 'households', householdId, 'data', 'inventory');
-                await setDoc(inventoryRef, inventory);
-            } catch (error) {
-                console.error('Error saving inventory:', error);
-                alert('Failed to save. Please try again.');
-            }
-        }
-
-        // Initialize input event listeners (only once)
-        let inputsInitialized = false;
-        function initializeInputs() {
-            if (inputsInitialized) return;
-            inputsInitialized = true;
-
+            // Add Enter key support for all inputs
             ['fridge', 'freezer', 'pantry', 'spices'].forEach(section => {
                 document.getElementById(`${section}-input`).addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') window.addItem(section);
+                    if (e.key === 'Enter') addItem(section);
                 });
             });
         }
 
         // Add item to a section
-        async function addItem(section) {
+        function addItem(section) {
             const input = document.getElementById(`${section}-input`);
             const item = input.value.trim();
 
             if (item) {
                 inventory[section].push(item);
-                await saveInventoryToFirebase();
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
                 input.value = '';
+                renderSection(section);
+                updateStats();
             }
         }
-        window.addItem = addItem;
 
         // Edit item
         function editItem(section, index) {
@@ -625,8 +549,8 @@
             listItem.innerHTML = `
                 <input type="text" class="edit-input" value="${item}" id="edit-${section}-${index}">
                 <div class="item-buttons">
-                    <button class="save-btn" onclick="window.saveEdit('${section}', ${index})" title="Save">👍</button>
-                    <button class="cancel-btn" onclick="window.cancelEdit('${section}')" title="Cancel">✕</button>
+                    <button class="save-btn" onclick="saveEdit('${section}', ${index})" title="Save">👍</button>
+                    <button class="cancel-btn" onclick="cancelEdit('${section}')" title="Cancel">✕</button>
                 </div>
             `;
 
@@ -637,52 +561,53 @@
 
             // Add Enter key support
             input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') window.saveEdit(section, index);
+                if (e.key === 'Enter') saveEdit(section, index);
             });
 
             // Add Escape key support
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') window.cancelEdit(section);
+                if (e.key === 'Escape') cancelEdit(section);
             });
         }
-        window.editItem = editItem;
 
         // Save edited item
-        async function saveEdit(section, index) {
+        function saveEdit(section, index) {
             const input = document.getElementById(`edit-${section}-${index}`);
             const newValue = input.value.trim();
 
             if (newValue) {
                 inventory[section][index] = newValue;
-                await saveInventoryToFirebase();
-            } else {
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
                 renderSection(section);
+            } else {
+                cancelEdit(section);
             }
         }
-        window.saveEdit = saveEdit;
 
         // Cancel edit
         function cancelEdit(section) {
             renderSection(section);
         }
-        window.cancelEdit = cancelEdit;
 
         // Delete item from a section
-        async function deleteItem(section, index) {
+        function deleteItem(section, index) {
             const deletedItem = inventory[section][index];
             inventory[section].splice(index, 1);
-            await saveInventoryToFirebase();
+            localStorage.setItem(section, JSON.stringify(inventory[section]));
+            renderSection(section);
+            updateStats();
 
             // Show undo option
-            showUndo(`Deleted "${deletedItem}"`, async () => {
+            showUndo(`Deleted "${deletedItem}"`, () => {
                 inventory[section].splice(index, 0, deletedItem);
-                await saveInventoryToFirebase();
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
+                renderSection(section);
+                updateStats();
             });
         }
-        window.deleteItem = deleteItem;
 
         // Clear entire section
-        async function clearSection(section) {
+        function clearSection(section) {
             if (inventory[section].length === 0) return;
 
             if (confirm(`Clear all items from ${section}?`)) {
@@ -690,16 +615,19 @@
                 const itemCount = clearedItems.length;
 
                 inventory[section] = [];
-                await saveInventoryToFirebase();
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
+                renderSection(section);
+                updateStats();
 
                 // Show undo option
-                showUndo(`Cleared ${itemCount} item${itemCount > 1 ? 's' : ''} from ${section}`, async () => {
+                showUndo(`Cleared ${itemCount} item${itemCount > 1 ? 's' : ''} from ${section}`, () => {
                     inventory[section] = clearedItems;
-                    await saveInventoryToFirebase();
+                    localStorage.setItem(section, JSON.stringify(inventory[section]));
+                    renderSection(section);
+                    updateStats();
                 });
             }
         }
-        window.clearSection = clearSection;
 
         // Render a specific section
         function renderSection(section) {
@@ -714,8 +642,8 @@
                     <li>
                         <span>${item}</span>
                         <div class="item-buttons">
-                            <button class="edit-btn" onclick="window.editItem('${section}', ${index})" title="Edit">✏️</button>
-                            <button class="delete-btn" onclick="window.deleteItem('${section}', ${index})" title="Delete">🗑️</button>
+                            <button class="edit-btn" onclick="editItem('${section}', ${index})" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="deleteItem('${section}', ${index})" title="Delete">🗑️</button>
                         </div>
                     </li>
                 `).join('');
@@ -736,8 +664,8 @@
             document.getElementById('spices-count').textContent = inventory.spices.length;
         }
 
-        // Make undo functions global
-        window.performUndo = performUndo;
+        // Initialize on page load
+        init();
     </script>
 </body>
 </html>

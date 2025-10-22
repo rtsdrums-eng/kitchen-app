@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accept Invitation - Kitchen App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-grey: #1a1a1a;
+            --medium-grey: #404040;
+            --light-grey: #e5e5e5;
+            --white: #ffffff;
+            --orange: #ff6b35;
+            --orange-hover: #e55a2b;
+            --orange-light: #fff5f2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-grey);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--black);
+        }
+
+        .container {
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .invite-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .invite-icon {
+            text-align: center;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--black);
+            margin-bottom: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--medium-grey);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .household-info {
+            background: var(--orange-light);
+            border: 2px solid var(--orange);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .household-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 8px;
+        }
+
+        .inviter-info {
+            font-size: 0.9rem;
+            color: var(--medium-grey);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--black);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--light-grey);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        input[type="email"]:disabled {
+            background: var(--light-grey);
+            color: var(--medium-grey);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: var(--white);
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: var(--orange-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--medium-grey);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #060;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--medium-grey);
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: var(--medium-grey);
+            font-size: 14px;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .link-text a {
+            color: var(--orange);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .invite-box {
+                padding: 30px 24px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="invite-box">
+            <div class="invite-icon">👋</div>
+            <h1>You're Invited!</h1>
+            <p class="subtitle" id="subtitle">Loading invitation...</p>
+
+            <div id="loading" class="loading show">Loading...</div>
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+
+            <div id="invitation-content" style="display: none;">
+                <div class="household-info">
+                    <div class="household-name" id="household-name"></div>
+                    <div class="inviter-info">Invited by <span id="inviter-email"></span></div>
+                </div>
+
+                <div id="login-form" style="display: none;">
+                    <p style="text-align: center; margin-bottom: 20px; color: var(--medium-grey); font-size: 14px;">
+                        You already have an account. Please log in to accept this invitation.
+                    </p>
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password">
+                    </div>
+                    <button class="btn btn-primary" onclick="window.handleLogin()">Log In & Accept Invitation</button>
+                    <div class="link-text">
+                        <a href="login.html">Cancel</a>
+                    </div>
+                </div>
+
+                <div id="signup-form" style="display: none;">
+                    <p style="text-align: center; margin-bottom: 20px; color: var(--medium-grey); font-size: 14px;">
+                        Create your account to accept this invitation.
+                    </p>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Create Password</label>
+                        <input type="password" id="signup-password" placeholder="At least 6 characters">
+                    </div>
+                    <button class="btn btn-primary" onclick="window.handleSignup()">Create Account & Accept Invitation</button>
+                    <div class="link-text">
+                        Already have an account? <a href="#" onclick="window.switchToLogin(); return false;">Log in instead</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
+            authDomain: "kitchen-app-48dfd.firebaseapp.com",
+            projectId: "kitchen-app-48dfd",
+            storageBucket: "kitchen-app-48dfd.firebasestorage.app",
+            messagingSenderId: "1085782615169",
+            appId: "1:1085782615169:web:c13f6604456b9f221c9980",
+            measurementId: "G-5QM7PRV02K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let invitationId = null;
+        let invitationData = null;
+        let userExists = false;
+
+        // Get invitation ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        invitationId = urlParams.get('id');
+
+        if (!invitationId) {
+            showError('Invalid invitation link');
+            document.getElementById('loading').classList.remove('show');
+        } else {
+            loadInvitation();
+        }
+
+        async function loadInvitation() {
+            try {
+                const inviteDoc = await getDoc(doc(db, 'invitations', invitationId));
+
+                if (!inviteDoc.exists()) {
+                    showError('Invitation not found or has expired');
+                    return;
+                }
+
+                invitationData = inviteDoc.data();
+
+                if (invitationData.status !== 'pending') {
+                    showError('This invitation has already been ' + invitationData.status);
+                    return;
+                }
+
+                // Display invitation details
+                document.getElementById('household-name').textContent = invitationData.householdName;
+                document.getElementById('inviter-email').textContent = invitationData.inviterEmail;
+                document.getElementById('subtitle').textContent = 'Join ' + invitationData.householdName;
+
+                // Check if user exists
+                const usersQuery = query(collection(db, 'users'), where('email', '==', invitationData.inviteeEmail));
+                const usersSnapshot = await getDocs(usersQuery);
+                userExists = !usersSnapshot.empty;
+
+                // Show appropriate form
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('invitation-content').style.display = 'block';
+
+                if (userExists) {
+                    // Show login form
+                    document.getElementById('login-email').value = invitationData.inviteeEmail;
+                    document.getElementById('login-form').style.display = 'block';
+                } else {
+                    // Show signup form
+                    document.getElementById('signup-email').value = invitationData.inviteeEmail;
+                    document.getElementById('signup-form').style.display = 'block';
+                }
+            } catch (error) {
+                showError('Error loading invitation: ' + error.message);
+            }
+        }
+
+        window.switchToLogin = function() {
+            document.getElementById('signup-form').style.display = 'none';
+            document.getElementById('login-email').value = invitationData.inviteeEmail;
+            document.getElementById('login-form').style.display = 'block';
+        };
+
+        window.handleLogin = async function() {
+            const password = document.getElementById('login-password').value;
+
+            if (!password) {
+                showError('Please enter your password');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                await signInWithEmailAndPassword(auth, invitationData.inviteeEmail, password);
+                // Will be handled by onAuthStateChanged
+            } catch (error) {
+                showLoading(false);
+                if (error.code === 'auth/wrong-password') {
+                    showError('Incorrect password');
+                } else if (error.code === 'auth/user-not-found') {
+                    showError('Account not found. Please create a new account instead.');
+                } else {
+                    showError('Login failed: ' + error.message);
+                }
+            }
+        };
+
+        window.handleSignup = async function() {
+            const password = document.getElementById('signup-password').value;
+
+            if (!password) {
+                showError('Please enter a password');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, invitationData.inviteeEmail, password);
+                const user = userCredential.user;
+
+                // Don't create a new household - will join the invited household
+                // Just create user document with the invited household ID
+                await setDoc(doc(db, 'users', user.uid), {
+                    email: user.email,
+                    householdId: invitationData.householdId,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Add user to the household
+                await updateDoc(doc(db, 'households', invitationData.householdId), {
+                    members: arrayUnion(user.uid)
+                });
+
+                // Update invitation
+                await updateDoc(doc(db, 'invitations', invitationId), {
+                    inviteeId: user.uid,
+                    status: 'accepted',
+                    acceptedAt: new Date().toISOString()
+                });
+
+                showSuccess('Account created and invitation accepted! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } catch (error) {
+                showLoading(false);
+                if (error.code === 'auth/email-already-in-use') {
+                    showError('An account with this email already exists. Please log in instead.');
+                } else {
+                    showError('Signup failed: ' + error.message);
+                }
+            }
+        };
+
+        // Handle already logged in user
+        onAuthStateChanged(auth, async (user) => {
+            if (user && invitationData) {
+                // User is already logged in
+                if (user.email.toLowerCase() === invitationData.inviteeEmail.toLowerCase()) {
+                    // Correct user - accept invitation automatically
+                    await acceptInvitation(user);
+                } else {
+                    // Wrong user - show error
+                    showError('You are logged in as ' + user.email + '. Please log out and try again.');
+                }
+            }
+        });
+
+        async function acceptInvitation(user) {
+            try {
+                showLoading(true);
+
+                // Get user's current household
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                const currentHouseholdId = userDoc.data().householdId;
+
+                // Remove from current household
+                await updateDoc(doc(db, 'households', currentHouseholdId), {
+                    members: arrayRemove(user.uid)
+                });
+
+                // Add to new household
+                await updateDoc(doc(db, 'households', invitationData.householdId), {
+                    members: arrayUnion(user.uid)
+                });
+
+                // Update user document
+                await updateDoc(doc(db, 'users', user.uid), {
+                    householdId: invitationData.householdId
+                });
+
+                // Update invitation
+                await updateDoc(doc(db, 'invitations', invitationId), {
+                    status: 'accepted',
+                    acceptedAt: new Date().toISOString()
+                });
+
+                showSuccess('Invitation accepted! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } catch (error) {
+                showLoading(false);
+                showError('Error accepting invitation: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.classList.add('show');
+        }
+
+        function showLoading(show) {
+            if (show) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('loading').classList.add('show');
+            }
+        }
+    </script>
+</body>
+</html>
