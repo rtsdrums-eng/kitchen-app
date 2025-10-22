@@ -128,7 +128,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="app-content" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span id="user-email" style="color: var(--medium-grey); font-size: 14px;"></span>
+            <button onclick="handleLogout()" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s;">Log Out</button>
+        </div>
+
         <h1>🍽️ Kitchen App</h1>
         <p class="subtitle">Manage your kitchen, plan your meals, and discover recipes</p>
 
@@ -164,5 +169,45 @@
             </a>
         </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
+            authDomain: "kitchen-app-48dfd.firebaseapp.com",
+            projectId: "kitchen-app-48dfd",
+            storageBucket: "kitchen-app-48dfd.firebasestorage.app",
+            messagingSenderId: "1085782615169",
+            appId: "1:1085782615169:web:c13f6604456b9f221c9980",
+            measurementId: "G-5QM7PRV02K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check authentication status
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is logged in
+                document.getElementById('app-content').style.display = 'block';
+                document.getElementById('user-email').textContent = user.email;
+            } else {
+                // User is not logged in, redirect to login page
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Logout function
+        window.handleLogout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                alert('Error logging out: ' + error.message);
+            }
+        };
+    </script>
 </body>
 </html>
