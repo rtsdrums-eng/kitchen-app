@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Suggestions - Kitchen App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-grey: #1a1a1a;
+            --medium-grey: #404040;
+            --light-grey: #e5e5e5;
+            --white: #ffffff;
+            --orange: #ff6b35;
+            --orange-hover: #e55a2b;
+            --orange-light: #fff5f2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-grey);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--black);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--black);
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .back-btn {
+            background: var(--white);
+            color: var(--black);
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--orange);
+            color: var(--white);
+            border-color: var(--orange);
+        }
+
+        .recipe-section {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .recipe-section h3 {
+            color: var(--black);
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .recipe-card {
+            background: var(--white);
+            border: 1px solid var(--light-grey);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .recipe-card:hover {
+            border-color: var(--orange);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .recipe-card.expanded {
+            border-color: var(--orange);
+            background: var(--orange-light);
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recipe-card h4 {
+            color: var(--black);
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recipe-details {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--light-grey);
+        }
+
+        .recipe-card.expanded .recipe-details {
+            display: block;
+        }
+
+        .recipe-card p {
+            color: var(--medium-grey);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .recipe-ingredients {
+            background: var(--white);
+            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid var(--light-grey);
+        }
+
+        .recipe-ingredients h5 {
+            color: var(--black);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .recipe-ingredients ul {
+            padding-left: 18px;
+            list-style: disc;
+        }
+
+        .recipe-ingredients li {
+            color: var(--black);
+            padding: 3px 0;
+            margin-bottom: 2px;
+            font-size: 14px;
+        }
+
+        .match-badge {
+            display: inline-block;
+            background: var(--orange);
+            color: var(--white);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .expand-icon {
+            color: var(--medium-grey);
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        .recipe-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .empty-state {
+            color: var(--medium-grey);
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .recipe-section {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="index.html" class="back-btn">← Back to Home</a>
+            <a href="help.html" class="back-btn">Help & Feedback</a>
+        </div>
+        <div class="header">
+            <h1>🍳 Recipe Suggestions</h1>
+        </div>
+
+        <div class="recipe-section">
+            <div id="recipe-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load data from localStorage
+        let inventory = {
+            fridge: JSON.parse(localStorage.getItem('fridge')) || [],
+            freezer: JSON.parse(localStorage.getItem('freezer')) || [],
+            pantry: JSON.parse(localStorage.getItem('pantry')) || [],
+            spices: JSON.parse(localStorage.getItem('spices')) || []
+        };
+
+        // Recipe database
+        const recipes = [
+            {
+                name: "Knorr's Rice with Chicken & Vegetables",
+                description: "A quick and easy one-pot meal combining rice, protein, and veggies.",
+                ingredients: ["knorr", "rice", "chicken", "rotisserie", "peas", "carrots", "frozen peas", "frozen carrots"],
+                requiredCount: 3
+            },
+            {
+                name: "Pasta Primavera",
+                description: "Fresh pasta with seasonal vegetables and garlic.",
+                ingredients: ["pasta", "spaghetti", "penne", "vegetables", "garlic", "olive oil", "parmesan"],
+                requiredCount: 3
+            },
+            {
+                name: "Chicken Stir Fry",
+                description: "Quick stir fry with chicken, vegetables, and soy sauce over rice.",
+                ingredients: ["chicken", "rice", "soy sauce", "vegetables", "broccoli", "carrots", "bell pepper", "garlic", "ginger"],
+                requiredCount: 4
+            },
+            {
+                name: "Tacos",
+                description: "Classic tacos with your choice of protein and toppings.",
+                ingredients: ["tortilla", "taco", "ground beef", "chicken", "cheese", "lettuce", "tomato", "salsa", "sour cream"],
+                requiredCount: 3
+            },
+            {
+                name: "Grilled Cheese & Tomato Soup",
+                description: "Comfort food classic - crispy grilled cheese with warm tomato soup.",
+                ingredients: ["bread", "cheese", "butter", "tomato soup", "soup"],
+                requiredCount: 3
+            },
+            {
+                name: "Chicken Caesar Salad",
+                description: "Classic Caesar salad with grilled or rotisserie chicken.",
+                ingredients: ["chicken", "rotisserie", "lettuce", "romaine", "caesar", "parmesan", "croutons"],
+                requiredCount: 3
+            },
+            {
+                name: "Fried Rice",
+                description: "Quick fried rice with eggs, vegetables, and soy sauce.",
+                ingredients: ["rice", "egg", "soy sauce", "vegetables", "peas", "carrots", "green onion", "garlic"],
+                requiredCount: 4
+            },
+            {
+                name: "Spaghetti & Meatballs",
+                description: "Italian classic with pasta, meatballs, and marinara sauce.",
+                ingredients: ["spaghetti", "pasta", "meatball", "ground beef", "marinara", "tomato sauce", "parmesan", "basil"],
+                requiredCount: 3
+            },
+            {
+                name: "Quesadillas",
+                description: "Cheesy quesadillas with optional chicken or vegetables.",
+                ingredients: ["tortilla", "cheese", "chicken", "bell pepper", "onion", "salsa"],
+                requiredCount: 2
+            },
+            {
+                name: "Chicken Noodle Soup",
+                description: "Warm, comforting soup with chicken, noodles, and vegetables.",
+                ingredients: ["chicken", "noodle", "pasta", "broth", "stock", "carrots", "celery", "onion"],
+                requiredCount: 4
+            },
+            {
+                name: "Omelette",
+                description: "Fluffy omelette with your choice of fillings.",
+                ingredients: ["egg", "cheese", "milk", "vegetables", "bell pepper", "onion", "mushroom", "spinach"],
+                requiredCount: 2
+            },
+            {
+                name: "BLT Sandwich",
+                description: "Classic bacon, lettuce, and tomato sandwich.",
+                ingredients: ["bacon", "lettuce", "tomato", "bread", "mayo"],
+                requiredCount: 4
+            }
+        ];
+
+        // Get all items from inventory as lowercase
+        function getAllItems() {
+            return [
+                ...inventory.fridge,
+                ...inventory.freezer,
+                ...inventory.pantry,
+                ...inventory.spices
+            ].map(item => item.toLowerCase());
+        }
+
+        // Check if inventory contains ingredient (fuzzy match)
+        function hasIngredient(ingredient, items) {
+            return items.some(item =>
+                item.includes(ingredient.toLowerCase()) ||
+                ingredient.toLowerCase().includes(item)
+            );
+        }
+
+        // Find matching recipes
+        function findRecipes() {
+            const allItems = getAllItems();
+            const recipeList = document.getElementById('recipe-list');
+
+            if (allItems.length === 0) {
+                recipeList.innerHTML = '<div class="empty-state">Add items to your inventory to see recipe suggestions!</div>';
+                return;
+            }
+
+            const matches = recipes.map(recipe => {
+                const matchedIngredients = recipe.ingredients.filter(ingredient =>
+                    hasIngredient(ingredient, allItems)
+                );
+
+                return {
+                    ...recipe,
+                    matchedIngredients,
+                    matchCount: matchedIngredients.length,
+                    matchPercentage: (matchedIngredients.length / recipe.ingredients.length) * 100
+                };
+            })
+            .filter(recipe => recipe.matchCount >= recipe.requiredCount)
+            .sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+            if (matches.length > 0) {
+                renderRecipes(matches);
+            } else {
+                recipeList.innerHTML = '<div class="empty-state">No recipes match your current inventory. Add more items to see suggestions!</div>';
+            }
+        }
+
+        // Render recipe suggestions
+        function renderRecipes(matches) {
+            const recipeList = document.getElementById('recipe-list');
+
+            recipeList.innerHTML = matches.map((recipe, index) => `
+                <div class="recipe-card" onclick="toggleRecipe(${index})">
+                    <div class="recipe-header">
+                        <h4>
+                            ${recipe.name}
+                            <span class="match-badge">${Math.round(recipe.matchPercentage)}% Match</span>
+                        </h4>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="recipe-details">
+                        <p>${recipe.description}</p>
+                        <div class="recipe-ingredients">
+                            <h5>Matched Ingredients (${recipe.matchCount})</h5>
+                            <ul>
+                                ${recipe.matchedIngredients.map(ing => `<li>${ing}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle recipe expansion
+        function toggleRecipe(index) {
+            const cards = document.querySelectorAll('.recipe-card');
+            cards[index].classList.toggle('expanded');
+        }
+
+        // Initialize the page
+        findRecipes();
+    </script>
+</body>
+</html>

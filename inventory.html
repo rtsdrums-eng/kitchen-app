@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Inventory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-grey: #1a1a1a;
+            --medium-grey: #404040;
+            --light-grey: #e5e5e5;
+            --white: #ffffff;
+            --orange: #ff6b35;
+            --orange-hover: #e55a2b;
+            --orange-light: #fff5f2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-grey);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--black);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--black);
+            margin-bottom: 40px;
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .section h2 {
+            color: var(--black);
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-grey);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 60px 12px 16px;
+            border: 2px solid var(--light-grey);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .add-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            color: var(--orange);
+            border: none;
+            padding: 0;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            font-style: italic;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover {
+            color: var(--orange-hover);
+        }
+
+        .clear-link {
+            display: block;
+            text-align: left;
+            margin-top: 12px;
+            color: var(--medium-grey);
+            font-size: 11px;
+            font-style: italic;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clear-link:hover {
+            color: var(--black);
+            text-decoration: underline;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            background: var(--white);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            border: 1px solid var(--light-grey);
+        }
+
+        li:hover {
+            border-color: var(--medium-grey);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        li span {
+            font-size: 14px;
+            color: var(--black);
+            font-weight: 400;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 0px;
+        }
+
+        .edit-btn {
+            background: transparent;
+            color: var(--orange);
+            padding: 6px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .edit-btn:hover {
+            color: var(--orange-hover);
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--medium-grey);
+            padding: 6px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .delete-btn:hover {
+            color: var(--black);
+            transform: scale(1.1);
+        }
+
+        .save-btn {
+            background: transparent;
+            color: var(--orange);
+            padding: 6px 10px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .save-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .cancel-btn {
+            background: transparent;
+            color: var(--medium-grey);
+            padding: 6px 10px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+            font-weight: bold;
+        }
+
+        .cancel-btn:hover {
+            color: var(--black);
+            transform: scale(1.15);
+        }
+
+        .edit-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid var(--orange);
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            min-width: 0;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: var(--orange-hover);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        li.editing {
+            flex-wrap: nowrap;
+            gap: 8px;
+        }
+
+        li.editing .edit-input {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        li.editing .item-buttons {
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            color: var(--medium-grey);
+            font-style: italic;
+            text-align: center;
+            padding: 24px;
+            font-size: 14px;
+        }
+
+        .undo-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--black);
+            color: var(--white);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .undo-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .undo-toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .undo-btn {
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .undo-btn:hover {
+            background: var(--orange-hover);
+        }
+
+        .stats {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .stats h3 {
+            color: var(--black);
+            margin-bottom: 24px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            padding: 20px;
+            background: var(--light-grey);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .stat-item:hover {
+            background: var(--orange-light);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--orange);
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--medium-grey);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 24px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="index.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">← Back to Home</a>
+            <a href="help.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">Help & Feedback</a>
+        </div>
+        <h1>🍽️ Kitchen Inventory</h1>
+
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="fridge-count">0</div>
+                    <div class="stat-label">Refrigerator</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="freezer-count">0</div>
+                    <div class="stat-label">Freezer</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pantry-count">0</div>
+                    <div class="stat-label">Pantry</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="spices-count">0</div>
+                    <div class="stat-label">Spices</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="section refrigerator">
+                <h2>🧊 Refrigerator</h2>
+                <div class="input-group">
+                    <input type="text" id="fridge-input" placeholder="Add item...">
+                    <button class="add-btn" onclick="addItem('fridge')">Add</button>
+                </div>
+                <ul id="fridge-list"></ul>
+                <a href="#" class="clear-link" id="fridge-clear" onclick="clearSection('fridge'); return false;">clear all items</a>
+            </div>
+
+            <div class="section freezer">
+                <h2>❄️ Freezer</h2>
+                <div class="input-group">
+                    <input type="text" id="freezer-input" placeholder="Add item...">
+                    <button class="add-btn" onclick="addItem('freezer')">Add</button>
+                </div>
+                <ul id="freezer-list"></ul>
+                <a href="#" class="clear-link" id="freezer-clear" onclick="clearSection('freezer'); return false;">clear all items</a>
+            </div>
+
+            <div class="section pantry">
+                <h2>🥫 Pantry</h2>
+                <div class="input-group">
+                    <input type="text" id="pantry-input" placeholder="Add item...">
+                    <button class="add-btn" onclick="addItem('pantry')">Add</button>
+                </div>
+                <ul id="pantry-list"></ul>
+                <a href="#" class="clear-link" id="pantry-clear" onclick="clearSection('pantry'); return false;">clear all items</a>
+            </div>
+
+            <div class="section spices">
+                <h2>🌶️ Spice Cabinet</h2>
+                <div class="input-group">
+                    <input type="text" id="spices-input" placeholder="Add item...">
+                    <button class="add-btn" onclick="addItem('spices')">Add</button>
+                </div>
+                <ul id="spices-list"></ul>
+                <a href="#" class="clear-link" id="spices-clear" onclick="clearSection('spices'); return false;">clear all items</a>
+            </div>
+        </div>
+
+        <div id="undo-toast" class="undo-toast">
+            <span class="undo-toast-message" id="undo-message"></span>
+            <button class="undo-btn" onclick="performUndo()">Undo</button>
+        </div>
+    </div>
+
+    <script>
+        // Load data from localStorage
+        let inventory = {
+            fridge: JSON.parse(localStorage.getItem('fridge')) || [],
+            freezer: JSON.parse(localStorage.getItem('freezer')) || [],
+            pantry: JSON.parse(localStorage.getItem('pantry')) || [],
+            spices: JSON.parse(localStorage.getItem('spices')) || []
+        };
+
+        // Undo functionality
+        let undoStack = null;
+        let undoTimeout = null;
+
+        function showUndo(message, undoAction) {
+            // Clear any existing undo
+            if (undoTimeout) {
+                clearTimeout(undoTimeout);
+            }
+
+            // Store the undo action
+            undoStack = undoAction;
+
+            // Show the toast
+            document.getElementById('undo-message').textContent = message;
+            document.getElementById('undo-toast').classList.add('show');
+
+            // Auto-hide after 5 seconds
+            undoTimeout = setTimeout(() => {
+                hideUndo();
+            }, 5000);
+        }
+
+        function hideUndo() {
+            document.getElementById('undo-toast').classList.remove('show');
+            undoStack = null;
+        }
+
+        function performUndo() {
+            if (undoStack) {
+                undoStack();
+                hideUndo();
+            }
+        }
+
+        // Initialize the page
+        function init() {
+            renderAll();
+            updateStats();
+
+            // Add Enter key support for all inputs
+            ['fridge', 'freezer', 'pantry', 'spices'].forEach(section => {
+                document.getElementById(`${section}-input`).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addItem(section);
+                });
+            });
+        }
+
+        // Add item to a section
+        function addItem(section) {
+            const input = document.getElementById(`${section}-input`);
+            const item = input.value.trim();
+
+            if (item) {
+                inventory[section].push(item);
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
+                input.value = '';
+                renderSection(section);
+                updateStats();
+            }
+        }
+
+        // Edit item
+        function editItem(section, index) {
+            const item = inventory[section][index];
+            const listItem = document.querySelector(`#${section}-list li:nth-child(${index + 1})`);
+
+            listItem.classList.add('editing');
+            listItem.innerHTML = `
+                <input type="text" class="edit-input" value="${item}" id="edit-${section}-${index}">
+                <div class="item-buttons">
+                    <button class="save-btn" onclick="saveEdit('${section}', ${index})" title="Save">👍</button>
+                    <button class="cancel-btn" onclick="cancelEdit('${section}')" title="Cancel">✕</button>
+                </div>
+            `;
+
+            // Focus the input and select all text
+            const input = document.getElementById(`edit-${section}-${index}`);
+            input.focus();
+            input.select();
+
+            // Add Enter key support
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit(section, index);
+            });
+
+            // Add Escape key support
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') cancelEdit(section);
+            });
+        }
+
+        // Save edited item
+        function saveEdit(section, index) {
+            const input = document.getElementById(`edit-${section}-${index}`);
+            const newValue = input.value.trim();
+
+            if (newValue) {
+                inventory[section][index] = newValue;
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
+                renderSection(section);
+            } else {
+                cancelEdit(section);
+            }
+        }
+
+        // Cancel edit
+        function cancelEdit(section) {
+            renderSection(section);
+        }
+
+        // Delete item from a section
+        function deleteItem(section, index) {
+            const deletedItem = inventory[section][index];
+            inventory[section].splice(index, 1);
+            localStorage.setItem(section, JSON.stringify(inventory[section]));
+            renderSection(section);
+            updateStats();
+
+            // Show undo option
+            showUndo(`Deleted "${deletedItem}"`, () => {
+                inventory[section].splice(index, 0, deletedItem);
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
+                renderSection(section);
+                updateStats();
+            });
+        }
+
+        // Clear entire section
+        function clearSection(section) {
+            if (inventory[section].length === 0) return;
+
+            if (confirm(`Clear all items from ${section}?`)) {
+                const clearedItems = [...inventory[section]];
+                const itemCount = clearedItems.length;
+
+                inventory[section] = [];
+                localStorage.setItem(section, JSON.stringify(inventory[section]));
+                renderSection(section);
+                updateStats();
+
+                // Show undo option
+                showUndo(`Cleared ${itemCount} item${itemCount > 1 ? 's' : ''} from ${section}`, () => {
+                    inventory[section] = clearedItems;
+                    localStorage.setItem(section, JSON.stringify(inventory[section]));
+                    renderSection(section);
+                    updateStats();
+                });
+            }
+        }
+
+        // Render a specific section
+        function renderSection(section) {
+            const list = document.getElementById(`${section}-list`);
+            const clearLink = document.getElementById(`${section}-clear`);
+
+            if (inventory[section].length === 0) {
+                list.innerHTML = '<div class="empty-state">No items yet</div>';
+                clearLink.style.display = 'none';
+            } else {
+                list.innerHTML = inventory[section].map((item, index) => `
+                    <li>
+                        <span>${item}</span>
+                        <div class="item-buttons">
+                            <button class="edit-btn" onclick="editItem('${section}', ${index})" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="deleteItem('${section}', ${index})" title="Delete">🗑️</button>
+                        </div>
+                    </li>
+                `).join('');
+                clearLink.style.display = 'block';
+            }
+        }
+
+        // Render all sections
+        function renderAll() {
+            ['fridge', 'freezer', 'pantry', 'spices'].forEach(renderSection);
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('fridge-count').textContent = inventory.fridge.length;
+            document.getElementById('freezer-count').textContent = inventory.freezer.length;
+            document.getElementById('pantry-count').textContent = inventory.pantry.length;
+            document.getElementById('spices-count').textContent = inventory.spices.length;
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

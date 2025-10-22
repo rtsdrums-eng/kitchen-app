@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping List - Kitchen App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-grey: #1a1a1a;
+            --medium-grey: #404040;
+            --light-grey: #e5e5e5;
+            --white: #ffffff;
+            --orange: #ff6b35;
+            --orange-hover: #e55a2b;
+            --orange-light: #fff5f2;
+            --green: #28a745;
+            --green-light: #d4edda;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-grey);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--black);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--black);
+            margin-bottom: 20px;
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .add-list-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .add-list-btn {
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-list-btn:hover {
+            background: var(--orange-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            cursor: move;
+        }
+
+        .section.dragging-section {
+            opacity: 0.5;
+        }
+
+        .section:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-grey);
+        }
+
+        .section-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .section h2 {
+            color: var(--black);
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rename-btn, .delete-list-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+
+        .rename-btn {
+            color: var(--orange);
+        }
+
+        .rename-btn:hover {
+            color: var(--orange-hover);
+        }
+
+        .delete-list-btn {
+            color: var(--medium-grey);
+        }
+
+        .delete-list-btn:hover {
+            color: var(--black);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 60px 12px 16px;
+            border: 2px solid var(--light-grey);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .add-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            color: var(--orange);
+            border: none;
+            padding: 0;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            font-style: italic;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover {
+            color: var(--orange-hover);
+        }
+
+        .clear-link {
+            display: block;
+            text-align: left;
+            margin-top: 12px;
+            color: var(--medium-grey);
+            font-size: 11px;
+            font-style: italic;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clear-link:hover {
+            color: var(--black);
+            text-decoration: underline;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            background: var(--white);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            border: 1px solid var(--light-grey);
+            cursor: grab;
+        }
+
+        li:active {
+            cursor: grabbing;
+        }
+
+        li.dragging {
+            opacity: 0.5;
+        }
+
+        li:hover {
+            border-color: var(--medium-grey);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--green);
+        }
+
+        .item-text {
+            font-size: 14px;
+            color: var(--black);
+            font-weight: 400;
+        }
+
+        .drag-handle {
+            color: var(--medium-grey);
+            font-size: 16px;
+            cursor: grab;
+            padding: 0 8px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 0px;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--medium-grey);
+            padding: 6px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .delete-btn:hover {
+            color: var(--black);
+            transform: scale(1.1);
+        }
+
+        .buy-again-btn {
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 8px;
+        }
+
+        .buy-again-btn:hover {
+            background: var(--orange-hover);
+        }
+
+        .empty-state {
+            color: var(--medium-grey);
+            font-style: italic;
+            text-align: center;
+            padding: 24px;
+            font-size: 14px;
+        }
+
+        .recently-purchased {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+            margin-top: 24px;
+        }
+
+        .recently-purchased h2 {
+            color: var(--black);
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-grey);
+        }
+
+        .purchased-item {
+            background: var(--white);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--light-grey);
+        }
+
+        .purchased-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .purchased-text {
+            font-size: 14px;
+            color: var(--black);
+            font-weight: 400;
+        }
+
+        .purchased-date {
+            font-size: 11px;
+            color: var(--medium-grey);
+            font-style: italic;
+        }
+
+        .undo-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--black);
+            color: var(--white);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .undo-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .undo-toast-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .undo-btn {
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .undo-btn:hover {
+            background: var(--orange-hover);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 16px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="index.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">← Back to Home</a>
+            <a href="help.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">Help & Feedback</a>
+        </div>
+        <h1>🛒 Shopping List</h1>
+
+        <div class="add-list-container">
+            <button class="add-list-btn" onclick="addNewList()">+ Add New Store List</button>
+        </div>
+
+        <div class="grid" id="lists-container">
+            <!-- Lists will be dynamically rendered here -->
+        </div>
+
+        <div class="recently-purchased">
+            <h2>✓ Recently Purchased</h2>
+            <ul id="purchased-list"></ul>
+            <div id="purchased-empty" class="empty-state">No recently purchased items</div>
+        </div>
+
+        <div id="undo-toast" class="undo-toast">
+            <span class="undo-toast-message" id="undo-message"></span>
+            <button class="undo-btn" onclick="performUndo()">Undo</button>
+        </div>
+    </div>
+
+    <script>
+        // Default store configurations
+        const defaultStores = [
+            { id: 'heb', name: 'H-E-B', emoji: '🏪' },
+            { id: 'costco', name: 'Costco', emoji: '🏬' },
+            { id: 'other', name: 'Other Stores', emoji: '🏪' }
+        ];
+
+        // Load data from localStorage
+        let stores = JSON.parse(localStorage.getItem('shopping-stores')) || defaultStores;
+        let storeOrder = JSON.parse(localStorage.getItem('shopping-store-order')) || stores.map(s => s.id);
+        let shoppingList = {};
+        let purchased = JSON.parse(localStorage.getItem('shopping-purchased')) || [];
+
+        // Load shopping lists for each store
+        stores.forEach(store => {
+            shoppingList[store.id] = JSON.parse(localStorage.getItem(`shopping-${store.id}`)) || [];
+        });
+
+        // Undo functionality
+        let undoStack = null;
+        let undoTimeout = null;
+
+        function showUndo(message, undoAction) {
+            if (undoTimeout) {
+                clearTimeout(undoTimeout);
+            }
+            undoStack = undoAction;
+            document.getElementById('undo-message').textContent = message;
+            document.getElementById('undo-toast').classList.add('show');
+            undoTimeout = setTimeout(() => {
+                hideUndo();
+            }, 5000);
+        }
+
+        function hideUndo() {
+            document.getElementById('undo-toast').classList.remove('show');
+            undoStack = null;
+        }
+
+        function performUndo() {
+            if (undoStack) {
+                undoStack();
+                hideUndo();
+            }
+        }
+
+        // Drag and drop variables for items
+        let draggedItem = null;
+        let draggedSection = null;
+        let draggedIndex = null;
+
+        // Drag and drop variables for sections
+        let draggedSectionElement = null;
+        let draggedSectionId = null;
+
+        // Add new store list
+        function addNewList() {
+            const name = prompt('Enter store name:');
+            if (name && name.trim()) {
+                const id = 'store_' + Date.now();
+                const newStore = { id, name: name.trim(), emoji: '🏪' };
+                stores.push(newStore);
+                storeOrder.push(id);
+                shoppingList[id] = [];
+
+                saveStores();
+                renderAllLists();
+            }
+        }
+
+        // Rename store
+        function renameStore(storeId) {
+            const store = stores.find(s => s.id === storeId);
+            if (store) {
+                const newName = prompt('Enter new name:', store.name);
+                if (newName && newName.trim()) {
+                    store.name = newName.trim();
+                    saveStores();
+                    renderAllLists();
+                }
+            }
+        }
+
+        // Delete store
+        function deleteStore(storeId) {
+            const store = stores.find(s => s.id === storeId);
+            if (store) {
+                if (confirm(`Delete "${store.name}" and all its items?`)) {
+                    const deletedStore = { ...store };
+                    const deletedItems = [...shoppingList[storeId]];
+                    const deletedIndex = stores.findIndex(s => s.id === storeId);
+
+                    stores = stores.filter(s => s.id !== storeId);
+                    storeOrder = storeOrder.filter(id => id !== storeId);
+                    delete shoppingList[storeId];
+                    localStorage.removeItem(`shopping-${storeId}`);
+
+                    saveStores();
+                    renderAllLists();
+
+                    showUndo(`Deleted "${deletedStore.name}"`, () => {
+                        stores.splice(deletedIndex, 0, deletedStore);
+                        storeOrder.splice(deletedIndex, 0, storeId);
+                        shoppingList[storeId] = deletedItems;
+                        localStorage.setItem(`shopping-${storeId}`, JSON.stringify(deletedItems));
+                        saveStores();
+                        renderAllLists();
+                    });
+                }
+            }
+        }
+
+        // Save stores configuration
+        function saveStores() {
+            localStorage.setItem('shopping-stores', JSON.stringify(stores));
+            localStorage.setItem('shopping-store-order', JSON.stringify(storeOrder));
+        }
+
+        // Initialize the page
+        function init() {
+            renderAllLists();
+            renderPurchased();
+        }
+
+        // Add item to a section
+        function addItem(storeId) {
+            const input = document.getElementById(`${storeId}-input`);
+            const item = input.value.trim();
+
+            if (item) {
+                shoppingList[storeId].push(item);
+                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                input.value = '';
+                renderSection(storeId);
+            }
+        }
+
+        // Delete item from a section
+        function deleteItem(storeId, index) {
+            const deletedItem = shoppingList[storeId][index];
+            shoppingList[storeId].splice(index, 1);
+            localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+            renderSection(storeId);
+
+            showUndo(`Deleted "${deletedItem}"`, () => {
+                shoppingList[storeId].splice(index, 0, deletedItem);
+                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                renderSection(storeId);
+            });
+        }
+
+        // Check item (move to purchased)
+        function checkItem(storeId, index) {
+            const item = shoppingList[storeId][index];
+            const store = stores.find(s => s.id === storeId);
+            const purchasedItem = {
+                name: item,
+                date: new Date().toISOString(),
+                storeId: storeId,
+                storeName: store ? store.name : storeId
+            };
+
+            shoppingList[storeId].splice(index, 1);
+            purchased.unshift(purchasedItem);
+
+            localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+            localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+
+            renderSection(storeId);
+            renderPurchased();
+
+            showUndo(`Marked "${item}" as purchased`, () => {
+                purchased.shift();
+                shoppingList[storeId].splice(index, 0, item);
+                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+                renderSection(storeId);
+                renderPurchased();
+            });
+        }
+
+        // Delete purchased item
+        function deletePurchased(index) {
+            const deletedItem = purchased[index];
+            purchased.splice(index, 1);
+            localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+            renderPurchased();
+
+            showUndo(`Deleted "${deletedItem.name}"`, () => {
+                purchased.splice(index, 0, deletedItem);
+                localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+                renderPurchased();
+            });
+        }
+
+        // Buy again - add item back to original store list
+        function buyAgain(index) {
+            const item = purchased[index];
+            const storeId = item.storeId;
+
+            // Check if store still exists
+            if (!shoppingList[storeId]) {
+                alert('The original store no longer exists. Please add this item manually.');
+                return;
+            }
+
+            shoppingList[storeId].push(item.name);
+            purchased.splice(index, 1);
+
+            localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+            localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+
+            renderSection(storeId);
+            renderPurchased();
+
+            showUndo(`Added "${item.name}" back to ${item.storeName}`, () => {
+                const lastIndex = shoppingList[storeId].length - 1;
+                shoppingList[storeId].splice(lastIndex, 1);
+                purchased.splice(index, 0, item);
+                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                localStorage.setItem('shopping-purchased', JSON.stringify(purchased));
+                renderSection(storeId);
+                renderPurchased();
+            });
+        }
+
+        // Clear entire section
+        function clearSection(storeId) {
+            if (shoppingList[storeId].length === 0) return;
+
+            const store = stores.find(s => s.id === storeId);
+            if (confirm(`Clear all items from ${store ? store.name : storeId}?`)) {
+                const clearedItems = [...shoppingList[storeId]];
+                const itemCount = clearedItems.length;
+
+                shoppingList[storeId] = [];
+                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                renderSection(storeId);
+
+                showUndo(`Cleared ${itemCount} item${itemCount > 1 ? 's' : ''} from ${store.name}`, () => {
+                    shoppingList[storeId] = clearedItems;
+                    localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                    renderSection(storeId);
+                });
+            }
+        }
+
+        // Drag and drop handlers for items
+        function handleDragStart(e, storeId, index) {
+            draggedItem = e.target;
+            draggedSection = storeId;
+            draggedIndex = index;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (e.target.tagName === 'LI' && !e.target.classList.contains('dragging')) {
+                e.target.style.borderTop = '2px solid var(--orange)';
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.target.tagName === 'LI') {
+                e.target.style.borderTop = '';
+            }
+        }
+
+        function handleDrop(e, storeId, dropIndex) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            e.target.style.borderTop = '';
+
+            if (draggedSection === storeId && draggedIndex !== dropIndex) {
+                const item = shoppingList[storeId][draggedIndex];
+                shoppingList[storeId].splice(draggedIndex, 1);
+
+                if (dropIndex > draggedIndex) {
+                    shoppingList[storeId].splice(dropIndex - 1, 0, item);
+                } else {
+                    shoppingList[storeId].splice(dropIndex, 0, item);
+                }
+
+                localStorage.setItem(`shopping-${storeId}`, JSON.stringify(shoppingList[storeId]));
+                renderSection(storeId);
+            }
+
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('li').forEach(item => {
+                item.style.borderTop = '';
+            });
+        }
+
+        // Drag and drop handlers for sections
+        function handleSectionDragStart(e, storeId) {
+            draggedSectionElement = e.currentTarget;
+            draggedSectionId = storeId;
+            e.currentTarget.classList.add('dragging-section');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleSectionDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleSectionDragEnter(e) {
+            const section = e.currentTarget;
+            if (section !== draggedSectionElement && section.classList.contains('section')) {
+                section.style.borderLeft = '4px solid var(--orange)';
+            }
+        }
+
+        function handleSectionDragLeave(e) {
+            const section = e.currentTarget;
+            if (section.classList.contains('section')) {
+                section.style.borderLeft = '';
+            }
+        }
+
+        function handleSectionDrop(e, dropStoreId) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            const section = e.currentTarget;
+            section.style.borderLeft = '';
+
+            if (draggedSectionId && draggedSectionId !== dropStoreId) {
+                const draggedIdx = storeOrder.indexOf(draggedSectionId);
+                const dropIdx = storeOrder.indexOf(dropStoreId);
+
+                storeOrder.splice(draggedIdx, 1);
+                storeOrder.splice(dropIdx, 0, draggedSectionId);
+
+                saveStores();
+                renderAllLists();
+            }
+
+            return false;
+        }
+
+        function handleSectionDragEnd(e) {
+            e.currentTarget.classList.remove('dragging-section');
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.borderLeft = '';
+            });
+        }
+
+        // Render a specific section
+        function renderSection(storeId) {
+            const list = document.getElementById(`${storeId}-list`);
+            const clearLink = document.getElementById(`${storeId}-clear`);
+
+            if (!list || !clearLink) return;
+
+            if (shoppingList[storeId].length === 0) {
+                list.innerHTML = '<div class="empty-state">No items yet</div>';
+                clearLink.style.display = 'none';
+            } else {
+                list.innerHTML = shoppingList[storeId].map((item, index) => `
+                    <li draggable="true"
+                        ondragstart="handleDragStart(event, '${storeId}', ${index})"
+                        ondragover="handleDragOver(event)"
+                        ondragenter="handleDragEnter(event)"
+                        ondragleave="handleDragLeave(event)"
+                        ondrop="handleDrop(event, '${storeId}', ${index})"
+                        ondragend="handleDragEnd(event)">
+                        <div class="item-content">
+                            <span class="drag-handle">☰</span>
+                            <input type="checkbox" class="item-checkbox" onchange="checkItem('${storeId}', ${index})">
+                            <span class="item-text">${item}</span>
+                        </div>
+                        <div class="item-buttons">
+                            <button class="delete-btn" onclick="deleteItem('${storeId}', ${index})" title="Delete">🗑️</button>
+                        </div>
+                    </li>
+                `).join('');
+                clearLink.style.display = 'block';
+            }
+        }
+
+        // Render all store lists
+        function renderAllLists() {
+            const container = document.getElementById('lists-container');
+            container.innerHTML = '';
+
+            storeOrder.forEach(storeId => {
+                const store = stores.find(s => s.id === storeId);
+                if (!store) return;
+
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.draggable = true;
+                section.ondragstart = (e) => handleSectionDragStart(e, storeId);
+                section.ondragover = handleSectionDragOver;
+                section.ondragenter = handleSectionDragEnter;
+                section.ondragleave = handleSectionDragLeave;
+                section.ondrop = (e) => handleSectionDrop(e, storeId);
+                section.ondragend = handleSectionDragEnd;
+
+                section.innerHTML = `
+                    <div class="section-header">
+                        <div class="section-title-wrapper">
+                            <h2>${store.emoji} ${store.name}</h2>
+                        </div>
+                        <div class="section-actions">
+                            <button class="rename-btn" onclick="renameStore('${storeId}')" title="Rename">✏️</button>
+                            <button class="delete-list-btn" onclick="deleteStore('${storeId}')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="${storeId}-input" placeholder="Add item...">
+                        <button class="add-btn" onclick="addItem('${storeId}')">Add</button>
+                    </div>
+                    <ul id="${storeId}-list"></ul>
+                    <a href="#" class="clear-link" id="${storeId}-clear" onclick="clearSection('${storeId}'); return false;">clear all items</a>
+                `;
+
+                container.appendChild(section);
+
+                // Add Enter key support
+                document.getElementById(`${storeId}-input`).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') addItem(storeId);
+                });
+
+                // Render items for this store
+                renderSection(storeId);
+            });
+        }
+
+        // Render purchased items
+        function renderPurchased() {
+            const list = document.getElementById('purchased-list');
+            const emptyState = document.getElementById('purchased-empty');
+
+            if (purchased.length === 0) {
+                list.innerHTML = '';
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                list.innerHTML = purchased.map((item, index) => {
+                    const date = new Date(item.date);
+                    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    return `
+                        <li class="purchased-item">
+                            <div class="purchased-content">
+                                <span class="purchased-text">${item.name}</span>
+                                <span class="purchased-date">Purchased on ${formattedDate}</span>
+                            </div>
+                            <div class="item-buttons">
+                                <button class="buy-again-btn" onclick="buyAgain(${index})">Buy Again</button>
+                                <button class="delete-btn" onclick="deletePurchased(${index})" title="Delete">🗑️</button>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

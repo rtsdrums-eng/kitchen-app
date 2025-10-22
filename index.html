@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-grey: #1a1a1a;
+            --medium-grey: #404040;
+            --light-grey: #e5e5e5;
+            --white: #ffffff;
+            --orange: #ff6b35;
+            --orange-hover: #e55a2b;
+            --orange-light: #fff5f2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-grey);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--black);
+            margin-bottom: 20px;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--medium-grey);
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .nav-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-color: var(--orange);
+        }
+
+        .nav-card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .nav-card h2 {
+            color: var(--black);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-card p {
+            color: var(--medium-grey);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 16px;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 40px;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .nav-card {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Kitchen App</h1>
+        <p class="subtitle">Manage your kitchen, plan your meals, and discover recipes</p>
+
+        <div class="nav-grid">
+            <a href="inventory.html" class="nav-card">
+                <div class="nav-card-icon">📦</div>
+                <h2>Kitchen Inventory</h2>
+                <p>Track what's in your fridge, freezer, pantry, and spice cabinet</p>
+            </a>
+
+            <a href="recipes.html" class="nav-card">
+                <div class="nav-card-icon">🍳</div>
+                <h2>Recipe Suggestions</h2>
+                <p>Discover recipes based on ingredients you already have</p>
+            </a>
+
+            <a href="shopping.html" class="nav-card">
+                <div class="nav-card-icon">🛒</div>
+                <h2>Shopping List</h2>
+                <p>Create and manage your grocery shopping list</p>
+            </a>
+
+            <a href="planner.html" class="nav-card">
+                <div class="nav-card-icon">📅</div>
+                <h2>Meal Planner</h2>
+                <p>Plan your meals for the week ahead</p>
+            </a>
+
+            <a href="help.html" class="nav-card">
+                <div class="nav-card-icon">💬</div>
+                <h2>Help & Feedback</h2>
+                <p>Get help or send us your feedback and suggestions</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
