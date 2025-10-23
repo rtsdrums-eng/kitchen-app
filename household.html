@@ -369,8 +369,11 @@
         <div class="section">
             <h2>Household Name</h2>
             <div class="household-name">
-                <input type="text" id="household-name-input" placeholder="My Household">
-                <button class="btn btn-primary" onclick="window.updateHouseholdName()">Save</button>
+                <input type="text" id="household-name-input" placeholder="My Household" disabled>
+                <button class="btn btn-primary" id="save-household-btn" onclick="window.updateHouseholdName()" disabled>Save</button>
+            </div>
+            <div id="household-loading" style="color: var(--medium-grey); font-size: 14px; margin-top: 8px; display: none;">
+                Loading household data...
             </div>
         </div>
 
@@ -456,18 +459,47 @@
 
         // Load household data
         async function loadHouseholdData() {
-            const householdDoc = await getDoc(doc(db, 'households', householdId));
-            if (householdDoc.exists()) {
-                householdData = householdDoc.data();
-                document.getElementById('household-name-input').value = householdData.name || 'My Household';
+            try {
+                document.getElementById('household-loading').style.display = 'block';
+
+                const householdDoc = await getDoc(doc(db, 'households', householdId));
+                if (householdDoc.exists()) {
+                    householdData = householdDoc.data();
+                    document.getElementById('household-name-input').value = householdData.name || 'My Household';
+                } else {
+                    // Household doesn't exist - create it
+                    householdData = {
+                        name: 'My Household',
+                        createdAt: new Date().toISOString(),
+                        createdBy: currentUser.uid,
+                        members: [currentUser.uid]
+                    };
+                    await setDoc(doc(db, 'households', householdId), householdData);
+                    document.getElementById('household-name-input').value = 'My Household';
+                }
+
+                // Enable the input and button
+                document.getElementById('household-name-input').disabled = false;
+                document.getElementById('save-household-btn').disabled = false;
+                document.getElementById('household-loading').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading household:', error);
+                showMessage('Error loading household data: ' + error.message, 'error');
+                document.getElementById('household-loading').textContent = 'Error loading household data';
             }
         }
 
         // Update household name
         async function updateHouseholdName() {
             const newName = document.getElementById('household-name-input').value.trim();
+
             if (!newName) {
                 showMessage('Please enter a household name', 'error');
+                return;
+            }
+
+            if (!householdId) {
+                showMessage('Loading household data, please try again in a moment', 'error');
                 return;
             }
 
@@ -475,6 +507,7 @@
                 await updateDoc(doc(db, 'households', householdId), {
                     name: newName
                 });
+                householdData.name = newName; // Update local data
                 showMessage('Household name updated successfully!', 'success');
             } catch (error) {
                 showMessage('Error updating household name: ' + error.message, 'error');
