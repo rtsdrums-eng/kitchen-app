@@ -473,6 +473,17 @@
         }
 
 
+        /* Hide collapse icon on larger screens */
+        @media (min-width: 769px) {
+            .collapse-icon {
+                display: none;
+            }
+
+            .section h2 {
+                cursor: default;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 24px 16px;

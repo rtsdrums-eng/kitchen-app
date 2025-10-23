@@ -585,6 +585,17 @@
             background: var(--orange-hover);
         }
 
+        /* Hide collapse icon on larger screens */
+        @media (min-width: 769px) {
+            .collapse-icon {
+                display: none;
+            }
+
+            .section-header {
+                cursor: default;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 24px 16px;

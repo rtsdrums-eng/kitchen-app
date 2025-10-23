@@ -236,6 +236,76 @@
             }
         }
     </style>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOu02ws51egerRqIw-lcB7NgkuJzH4rYY",
+            authDomain: "kitchen-app-c62b7.firebaseapp.com",
+            projectId: "kitchen-app-c62b7",
+            storageBucket: "kitchen-app-c62b7.firebasestorage.app",
+            messagingSenderId: "1085782615169",
+            appId: "1:1085782615169:web:c13f6604456b9f221c9980",
+            measurementId: "G-5QM7PRV02K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            window.currentUser = user; // Make available globally
+        });
+
+        // Make Firebase available to inline script
+        window.submitFeedback = async function(formData) {
+            try {
+                // Save to feedback collection for record keeping
+                await addDoc(collection(db, 'feedback'), formData);
+
+                // Also trigger email notification via mail collection
+                await addDoc(collection(db, 'mail'), {
+                    to: ['ryanstansky@gmail.com'],
+                    message: {
+                        subject: `New Feedback: ${formData.subject}`,
+                        text: `
+New feedback received from Mise Kitchen:
+
+From: ${formData.name} (${formData.email})
+User: ${formData.userEmail}
+Subject: ${formData.subject}
+
+Message:
+${formData.message}
+
+Submitted: ${new Date(formData.timestamp).toLocaleString()}
+                        `,
+                        html: `
+                            <h2>New Feedback from Mise Kitchen</h2>
+                            <p><strong>From:</strong> ${formData.name} (${formData.email})</p>
+                            <p><strong>User:</strong> ${formData.userEmail}</p>
+                            <p><strong>Subject:</strong> ${formData.subject}</p>
+                            <p><strong>Message:</strong></p>
+                            <p>${formData.message}</p>
+                            <hr>
+                            <p><small>Submitted: ${new Date(formData.timestamp).toLocaleString()}</small></p>
+                        `
+                    }
+                });
+
+                return true;
+            } catch (error) {
+                console.error('Error saving feedback:', error);
+                return false;
+            }
+        };
+    </script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -299,8 +369,14 @@
     </div>
 
     <script>
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
+        document.getElementById('contact-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            // Disable submit button to prevent double submission
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
 
             // Get form values
             const formData = {
@@ -308,24 +384,32 @@
                 email: document.getElementById('email').value,
                 subject: document.getElementById('subject').value,
                 message: document.getElementById('message').value,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                userId: window.currentUser ? window.currentUser.uid : 'anonymous',
+                userEmail: window.currentUser ? window.currentUser.email : 'anonymous'
             };
 
-            // Save to localStorage (in a real app, this would send to a server)
-            let feedback = JSON.parse(localStorage.getItem('feedback')) || [];
-            feedback.push(formData);
-            localStorage.setItem('feedback', JSON.stringify(feedback));
+            // Save to Firebase
+            const success = await window.submitFeedback(formData);
 
-            // Show success message
-            document.getElementById('success-message').classList.add('show');
+            if (success) {
+                // Show success message
+                document.getElementById('success-message').classList.add('show');
 
-            // Reset form
-            document.getElementById('contact-form').reset();
+                // Reset form
+                document.getElementById('contact-form').reset();
 
-            // Hide success message after 5 seconds
-            setTimeout(() => {
-                document.getElementById('success-message').classList.remove('show');
-            }, 5000);
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('success-message').classList.remove('show');
+                }, 5000);
+            } else {
+                alert('Sorry, there was an error sending your feedback. Please try again.');
+            }
+
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         });
     </script>
 </body>
