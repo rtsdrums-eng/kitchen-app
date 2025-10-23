@@ -30,13 +30,68 @@
             font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--light-grey);
             min-height: 100vh;
-            padding: 40px 20px;
             color: var(--black);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--medium-grey);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-btn:hover {
+            background: var(--orange-light);
+            color: var(--orange);
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
         h1 {
@@ -76,6 +131,35 @@
             letter-spacing: -0.01em;
             padding-bottom: 10px;
             border-bottom: 2px solid var(--light-grey);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 1.3rem;
+        }
+
+        .collapse-icon {
+            color: var(--medium-grey);
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+
+        .section.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section.collapsed .section-content {
+            display: none;
         }
 
         .input-group {
@@ -85,13 +169,18 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 60px 12px 16px;
+            padding: 12px 50px 12px 16px;
             border: 2px solid var(--light-grey);
             border-radius: 8px;
             font-size: 15px;
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
             background: var(--white);
+        }
+
+        input[type="text"]::placeholder {
+            font-size: 13px;
+            font-style: italic;
         }
 
         input[type="text"]:focus {
@@ -108,17 +197,17 @@
             background: transparent;
             color: var(--orange);
             border: none;
-            padding: 0;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
-            font-style: italic;
+            padding: 8px;
+            font-size: 20px;
+            font-weight: 300;
             cursor: pointer;
             transition: all 0.2s;
+            opacity: 0.7;
         }
 
         .add-btn:hover {
-            color: var(--orange-hover);
+            opacity: 1;
+            transform: translateY(-50%) scale(1.1);
         }
 
         .clear-link {
@@ -163,6 +252,18 @@
         li.sortable-ghost {
             opacity: 0.4;
             background: var(--orange-light);
+            border-top: 3px solid var(--orange);
+            border-bottom: 3px solid var(--orange);
+        }
+
+        li.sortable-ghost::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -3px;
+            height: 3px;
+            background: var(--orange);
         }
 
         li.sortable-drag {
@@ -188,10 +289,16 @@
             flex: 1;
         }
 
-        li span {
+        .item-text {
             font-size: 14px;
             color: var(--black);
             font-weight: 400;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .item-text:hover {
+            color: var(--orange);
         }
 
         .item-buttons {
@@ -199,33 +306,21 @@
             gap: 0px;
         }
 
-        .edit-btn {
+        .delete-btn {
             background: transparent;
             color: var(--orange);
             padding: 6px 10px;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 300;
             border: none;
             cursor: pointer;
             line-height: 1;
-        }
-
-        .edit-btn:hover {
-            color: var(--orange-hover);
-            transform: scale(1.1);
-        }
-
-        .delete-btn {
-            background: transparent;
-            color: var(--medium-grey);
-            padding: 6px 10px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            line-height: 1;
+            opacity: 0.6;
+            transition: opacity 0.2s;
         }
 
         .delete-btn:hover {
-            color: var(--black);
+            opacity: 1;
             transform: scale(1.1);
         }
 
@@ -264,9 +359,10 @@
             padding: 8px 12px;
             border: 2px solid var(--orange);
             border-radius: 6px;
-            font-size: 15px;
+            font-size: 14px;
             font-family: 'Montserrat', sans-serif;
             min-width: 0;
+            width: 100%;
         }
 
         .edit-input:focus {
@@ -277,6 +373,10 @@
 
         li.editing {
             flex-wrap: nowrap;
+        }
+
+        li.editing .item-content {
+            flex: 1;
             gap: 8px;
         }
 
@@ -295,6 +395,22 @@
             text-align: center;
             padding: 24px;
             font-size: 14px;
+        }
+
+        .example-item {
+            opacity: 0.4;
+            font-style: italic;
+            color: var(--medium-grey);
+        }
+
+        .example-item .item-text {
+            cursor: default;
+        }
+
+        .example-item .drag-handle,
+        .example-item .delete-btn {
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         .undo-toast {
@@ -341,53 +457,19 @@
             background: var(--orange-hover);
         }
 
-        .stats {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 32px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.06);
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .stats h3 {
-            color: var(--black);
-            margin-bottom: 24px;
-            font-size: 1.25rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .stat-item {
-            padding: 20px;
-            background: var(--light-grey);
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-
-        .stat-item:hover {
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
             background: var(--orange-light);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
             color: var(--orange);
-            letter-spacing: -0.02em;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--medium-grey);
-            margin-top: 8px;
-            font-weight: 500;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
         }
 
 
@@ -401,12 +483,6 @@
                 gap: 16px;
             }
 
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-
-
             h1 {
                 font-size: 2rem;
                 margin-bottom: 24px;
@@ -415,81 +491,114 @@
             .section {
                 padding: 20px;
             }
-
-            .stat-number {
-                font-size: 2rem;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <a href="index.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">← Back to Home</a>
-            <a href="help.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">Help & Feedback</a>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html" class="icon-btn" title="Back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <a href="index.html" class="navbar-brand">Mise Kitchen</a>
         </div>
-        <h1>Kitchen Inventory</h1>
+        <div class="navbar-right">
+            <a href="household.html" class="icon-btn" title="Household Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </a>
+            <a href="help.html" class="icon-btn" title="Help & Feedback">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </a>
+        </div>
+    </nav>
 
-        <div class="stats">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number" id="fridge-count">0</div>
-                    <div class="stat-label">Refrigerator</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="freezer-count">0</div>
-                    <div class="stat-label">Freezer</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="pantry-count">0</div>
-                    <div class="stat-label">Pantry</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="spices-count">0</div>
-                    <div class="stat-label">Spices</div>
-                </div>
-            </div>
-        </div>
+    <div class="container">
+        <h1>Kitchen Inventory</h1>
 
         <div class="grid">
             <div class="section refrigerator">
-                <h2>🧊 Refrigerator</h2>
-                <div class="input-group">
-                    <input type="text" id="fridge-input" placeholder="Add item...">
-                    <button class="add-btn" onclick="addItem('fridge')">Add</button>
+                <h2 onclick="toggleSection(this)">
+                    <div class="section-title-left">
+                        <span class="section-icon">🧊</span> Refrigerator
+                        <span class="count-badge" id="fridge-count">0</span>
+                    </div>
+                    <span class="collapse-icon">▼</span>
+                </h2>
+                <div class="section-content">
+                    <div class="input-group">
+                        <input type="text" id="fridge-input" placeholder="Add item...">
+                        <button class="add-btn" onclick="addItem('fridge')">+</button>
+                    </div>
+                    <ul id="fridge-list"></ul>
+                    <a href="#" class="clear-link" id="fridge-clear" onclick="window.clearSection('fridge'); return false;">clear all items</a>
                 </div>
-                <ul id="fridge-list"></ul>
-                <a href="#" class="clear-link" id="fridge-clear" onclick="window.clearSection('fridge'); return false;">clear all items</a>
             </div>
 
             <div class="section freezer">
-                <h2>❄️ Freezer</h2>
-                <div class="input-group">
-                    <input type="text" id="freezer-input" placeholder="Add item...">
-                    <button class="add-btn" onclick="addItem('freezer')">Add</button>
+                <h2 onclick="toggleSection(this)">
+                    <div class="section-title-left">
+                        <span class="section-icon">❄️</span> Freezer
+                        <span class="count-badge" id="freezer-count">0</span>
+                    </div>
+                    <span class="collapse-icon">▼</span>
+                </h2>
+                <div class="section-content">
+                    <div class="input-group">
+                        <input type="text" id="freezer-input" placeholder="Add item...">
+                        <button class="add-btn" onclick="addItem('freezer')">+</button>
+                    </div>
+                    <ul id="freezer-list"></ul>
+                    <a href="#" class="clear-link" id="freezer-clear" onclick="window.clearSection('freezer'); return false;">clear all items</a>
                 </div>
-                <ul id="freezer-list"></ul>
-                <a href="#" class="clear-link" id="freezer-clear" onclick="window.clearSection('freezer'); return false;">clear all items</a>
             </div>
 
             <div class="section pantry">
-                <h2>🥫 Pantry</h2>
-                <div class="input-group">
-                    <input type="text" id="pantry-input" placeholder="Add item...">
-                    <button class="add-btn" onclick="addItem('pantry')">Add</button>
+                <h2 onclick="toggleSection(this)">
+                    <div class="section-title-left">
+                        <span class="section-icon">🥫</span> Pantry
+                        <span class="count-badge" id="pantry-count">0</span>
+                    </div>
+                    <span class="collapse-icon">▼</span>
+                </h2>
+                <div class="section-content">
+                    <div class="input-group">
+                        <input type="text" id="pantry-input" placeholder="Add item...">
+                        <button class="add-btn" onclick="addItem('pantry')">+</button>
+                    </div>
+                    <ul id="pantry-list"></ul>
+                    <a href="#" class="clear-link" id="pantry-clear" onclick="window.clearSection('pantry'); return false;">clear all items</a>
                 </div>
-                <ul id="pantry-list"></ul>
-                <a href="#" class="clear-link" id="pantry-clear" onclick="window.clearSection('pantry'); return false;">clear all items</a>
             </div>
 
             <div class="section spices">
-                <h2>🌶️ Spice Cabinet</h2>
-                <div class="input-group">
-                    <input type="text" id="spices-input" placeholder="Add item...">
-                    <button class="add-btn" onclick="addItem('spices')">Add</button>
+                <h2 onclick="toggleSection(this)">
+                    <div class="section-title-left">
+                        <span class="section-icon">🌶️</span> Spice Cabinet
+                        <span class="count-badge" id="spices-count">0</span>
+                    </div>
+                    <span class="collapse-icon">▼</span>
+                </h2>
+                <div class="section-content">
+                    <div class="input-group">
+                        <input type="text" id="spices-input" placeholder="Add item...">
+                        <button class="add-btn" onclick="addItem('spices')">+</button>
+                    </div>
+                    <ul id="spices-list"></ul>
+                    <a href="#" class="clear-link" id="spices-clear" onclick="window.clearSection('spices'); return false;">clear all items</a>
                 </div>
-                <ul id="spices-list"></ul>
-                <a href="#" class="clear-link" id="spices-clear" onclick="window.clearSection('spices'); return false;">clear all items</a>
             </div>
         </div>
 
@@ -524,6 +633,14 @@
             freezer: [],
             pantry: [],
             spices: []
+        };
+
+        // Example items to show when sections are empty
+        const exampleItems = {
+            fridge: ['Milk', 'Eggs', 'Fresh vegetables'],
+            freezer: ['Ice cream', 'Frozen vegetables', 'Chicken breast'],
+            pantry: ['Pasta', 'Rice', 'Canned beans'],
+            spices: ['Salt', 'Black pepper', 'Garlic powder']
         };
 
         // Undo functionality
@@ -659,7 +776,7 @@
             const item = input.value.trim();
 
             if (item) {
-                inventory[section].push(item);
+                inventory[section].unshift(item);
                 await saveInventoryToFirebase();
                 input.value = '';
             }
@@ -673,10 +790,8 @@
 
             listItem.classList.add('editing');
             listItem.innerHTML = `
-                <input type="text" class="edit-input" value="${item}" id="edit-${section}-${index}">
-                <div class="item-buttons">
-                    <button class="save-btn" onclick="window.saveEdit('${section}', ${index})" title="Save">👍</button>
-                    <button class="cancel-btn" onclick="window.cancelEdit('${section}')" title="Cancel">✕</button>
+                <div class="item-content">
+                    <input type="text" class="edit-input" value="${item}" id="edit-${section}-${index}">
                 </div>
             `;
 
@@ -685,14 +800,25 @@
             input.focus();
             input.select();
 
-            // Add Enter key support
+            // Save on Enter key
             input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') window.saveEdit(section, index);
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    window.saveEdit(section, index);
+                }
             });
 
-            // Add Escape key support
+            // Cancel on Escape key
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') window.cancelEdit(section);
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    window.cancelEdit(section);
+                }
+            });
+
+            // Save on blur (clicking away)
+            input.addEventListener('blur', () => {
+                window.saveEdit(section, index);
             });
         }
         window.editItem = editItem;
@@ -731,6 +857,13 @@
         }
         window.deleteItem = deleteItem;
 
+        // Toggle section collapse
+        function toggleSection(h2Element) {
+            const section = h2Element.closest('.section');
+            section.classList.toggle('collapsed');
+        }
+        window.toggleSection = toggleSection;
+
         // Clear entire section
         async function clearSection(section) {
             if (inventory[section].length === 0) return;
@@ -757,18 +890,28 @@
             const clearLink = document.getElementById(`${section}-clear`);
 
             if (inventory[section].length === 0) {
-                list.innerHTML = '<div class="empty-state">No items yet</div>';
+                // Show example items when empty
+                list.innerHTML = exampleItems[section].map((item, index) => `
+                    <li class="example-item" data-id="${index}">
+                        <div class="item-content">
+                            <span class="drag-handle">☰</span>
+                            <span class="item-text">${item}</span>
+                        </div>
+                        <div class="item-buttons">
+                            <button class="delete-btn" title="Delete">×</button>
+                        </div>
+                    </li>
+                `).join('');
                 clearLink.style.display = 'none';
             } else {
                 list.innerHTML = inventory[section].map((item, index) => `
                     <li data-id="${index}">
                         <div class="item-content">
                             <span class="drag-handle">☰</span>
-                            <span>${item}</span>
+                            <span class="item-text" onclick="window.editItem('${section}', ${index})">${item}</span>
                         </div>
                         <div class="item-buttons">
-                            <button class="edit-btn" onclick="window.editItem('${section}', ${index})" title="Edit">✏️</button>
-                            <button class="delete-btn" onclick="window.deleteItem('${section}', ${index})" title="Delete">🗑️</button>
+                            <button class="delete-btn" onclick="window.deleteItem('${section}', ${index})" title="Delete">×</button>
                         </div>
                     </li>
                 `).join('');

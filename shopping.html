@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping List - Kitchen App</title>
+    <title>Shopping Lists - Mise Kitchen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,13 +32,68 @@
             font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--light-grey);
             min-height: 100vh;
-            padding: 40px 20px;
             color: var(--black);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--medium-grey);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-btn:hover {
+            background: var(--orange-light);
+            color: var(--orange);
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
         h1 {
@@ -122,6 +177,45 @@
             letter-spacing: -0.01em;
             margin: 0;
             cursor: pointer;
+            transition: color 0.2s;
+            user-select: none;
+        }
+
+        .section h2:hover {
+            color: var(--orange);
+        }
+
+        .collapse-icon {
+            color: var(--medium-grey);
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .section.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section.collapsed .section-content {
+            display: none;
+        }
+
+        .edit-store-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            border: 2px solid var(--orange);
+            border-radius: 6px;
+            padding: 6px 12px;
+            background: var(--white);
+            color: var(--black);
+            outline: none;
+            min-width: 200px;
+        }
+
+        .edit-store-name:focus {
+            border-color: var(--orange-hover);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         }
 
         .section-actions {
@@ -147,11 +241,15 @@
         }
 
         .delete-list-btn {
-            color: var(--medium-grey);
+            color: var(--orange);
+            font-size: 18px;
+            font-weight: 300;
+            opacity: 0.6;
         }
 
         .delete-list-btn:hover {
-            color: var(--black);
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         .input-group {
@@ -161,13 +259,18 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 60px 12px 16px;
+            padding: 12px 50px 12px 16px;
             border: 2px solid var(--light-grey);
             border-radius: 8px;
             font-size: 15px;
             font-family: 'Montserrat', sans-serif;
             transition: all 0.2s;
             background: var(--white);
+        }
+
+        input[type="text"]::placeholder {
+            font-size: 13px;
+            font-style: italic;
         }
 
         input[type="text"]:focus {
@@ -184,17 +287,17 @@
             background: transparent;
             color: var(--orange);
             border: none;
-            padding: 0;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
-            font-style: italic;
+            padding: 8px;
+            font-size: 20px;
+            font-weight: 300;
             cursor: pointer;
             transition: all 0.2s;
+            opacity: 0.7;
         }
 
         .add-btn:hover {
-            color: var(--orange-hover);
+            opacity: 1;
+            transform: translateY(-50%) scale(1.1);
         }
 
         .clear-link {
@@ -239,6 +342,18 @@
         li.sortable-ghost {
             opacity: 0.4;
             background: var(--orange-light);
+            border-top: 3px solid var(--orange);
+            border-bottom: 3px solid var(--orange);
+        }
+
+        li.sortable-ghost::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -3px;
+            height: 3px;
+            background: var(--orange);
         }
 
         li.sortable-drag {
@@ -268,6 +383,12 @@
             font-size: 14px;
             color: var(--black);
             font-weight: 400;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .item-text:hover {
+            color: var(--orange);
         }
 
         .drag-handle {
@@ -288,16 +409,19 @@
 
         .delete-btn {
             background: transparent;
-            color: var(--medium-grey);
+            color: var(--orange);
             padding: 6px 10px;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 300;
             border: none;
             cursor: pointer;
             line-height: 1;
+            opacity: 0.6;
+            transition: opacity 0.2s;
         }
 
         .delete-btn:hover {
-            color: var(--black);
+            opacity: 1;
             transform: scale(1.1);
         }
 
@@ -318,12 +442,54 @@
             background: var(--orange-hover);
         }
 
+        .edit-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid var(--orange);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: var(--orange-hover);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        li.editing {
+            flex-wrap: nowrap;
+        }
+
+        li.editing .item-content {
+            flex: 1;
+            gap: 8px;
+        }
+
         .empty-state {
             color: var(--medium-grey);
             font-style: italic;
             text-align: center;
             padding: 24px;
             font-size: 14px;
+        }
+
+        .example-item {
+            opacity: 0.4;
+            font-style: italic;
+            color: var(--medium-grey);
+        }
+
+        .example-item .item-text {
+            cursor: default;
+        }
+
+        .example-item .drag-handle,
+        .example-item .delete-btn {
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         .recently-purchased {
@@ -441,11 +607,37 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <a href="index.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">← Back to Home</a>
-            <a href="help.html" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; display: inline-block;">Help & Feedback</a>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html" class="icon-btn" title="Back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <a href="index.html" class="navbar-brand">Mise Kitchen</a>
         </div>
+        <div class="navbar-right">
+            <a href="household.html" class="icon-btn" title="Household Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </a>
+            <a href="help.html" class="icon-btn" title="Help & Feedback">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
         <h1>Shopping Lists</h1>
 
         <div class="add-list-container">
@@ -506,6 +698,13 @@
         stores.forEach(store => {
             shoppingList[store.id] = [];
         });
+
+        // Example items to show when lists are empty
+        const exampleItems = {
+            'heb': ['Bananas', 'Bread', 'Milk'],
+            'costco': ['Paper towels', 'Chicken', 'Snacks'],
+            'other': ['Specialty items', 'Miscellaneous', 'Pet food']
+        };
 
         // Check authentication and load data
         onAuthStateChanged(auth, async (user) => {
@@ -634,11 +833,51 @@
         async function renameStore(storeId) {
             const store = stores.find(s => s.id === storeId);
             if (store) {
-                const newName = prompt('Enter new name:', store.name);
-                if (newName && newName.trim()) {
-                    store.name = newName.trim();
-                    await saveShoppingDataToFirebase();
-                }
+                const sectionElement = document.querySelector(`[data-store-id="${storeId}"]`);
+                const h2Element = sectionElement.querySelector('h2');
+
+                // Store original content
+                const originalContent = h2Element.innerHTML;
+
+                // Create input for editing
+                h2Element.innerHTML = `<input type="text" class="edit-store-name" value="${store.name}" id="edit-store-${storeId}">`;
+
+                const input = document.getElementById(`edit-store-${storeId}`);
+                input.focus();
+                input.select();
+
+                // Save on Enter
+                input.addEventListener('keypress', async (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const newName = input.value.trim();
+                        if (newName) {
+                            store.name = newName;
+                            await saveShoppingDataToFirebase();
+                        } else {
+                            renderSections();
+                        }
+                    }
+                });
+
+                // Save on blur
+                input.addEventListener('blur', async () => {
+                    const newName = input.value.trim();
+                    if (newName) {
+                        store.name = newName;
+                        await saveShoppingDataToFirebase();
+                    } else {
+                        renderSections();
+                    }
+                });
+
+                // Cancel on Escape
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        renderSections();
+                    }
+                });
             }
         }
         window.renameStore = renameStore;
@@ -675,12 +914,66 @@
             const item = input.value.trim();
 
             if (item) {
-                shoppingList[storeId].push(item);
+                shoppingList[storeId].unshift(item);
                 await saveShoppingDataToFirebase();
                 input.value = '';
             }
         }
         window.addItem = addItem;
+
+        // Edit item
+        function editItem(storeId, index) {
+            const item = shoppingList[storeId][index];
+            const listItem = document.querySelector(`#${storeId}-list li:nth-child(${index + 1})`);
+
+            listItem.classList.add('editing');
+            listItem.innerHTML = `
+                <div class="item-content">
+                    <input type="text" class="edit-input" value="${item}" id="edit-${storeId}-${index}">
+                </div>
+            `;
+
+            // Focus the input and select all text
+            const input = document.getElementById(`edit-${storeId}-${index}`);
+            input.focus();
+            input.select();
+
+            // Save on Enter key
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    window.saveEdit(storeId, index);
+                }
+            });
+
+            // Cancel on Escape key
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    renderList(storeId);
+                }
+            });
+
+            // Save on blur (clicking away)
+            input.addEventListener('blur', () => {
+                window.saveEdit(storeId, index);
+            });
+        }
+        window.editItem = editItem;
+
+        // Save edited item
+        async function saveEdit(storeId, index) {
+            const input = document.getElementById(`edit-${storeId}-${index}`);
+            const newValue = input.value.trim();
+
+            if (newValue) {
+                shoppingList[storeId][index] = newValue;
+                await saveShoppingDataToFirebase();
+            } else {
+                renderList(storeId);
+            }
+        }
+        window.saveEdit = saveEdit;
 
         // Delete item from a section
         async function deleteItem(storeId, index) {
@@ -694,6 +987,13 @@
             });
         }
         window.deleteItem = deleteItem;
+
+        // Toggle section collapse
+        function toggleSection(headerElement) {
+            const section = headerElement.closest('.section');
+            section.classList.toggle('collapsed');
+        }
+        window.toggleSection = toggleSection;
 
         // Check item (move to purchased)
         async function checkItem(storeId, index) {
@@ -914,7 +1214,20 @@
             if (!list || !clearLink) return;
 
             if (shoppingList[storeId].length === 0) {
-                list.innerHTML = '<div class="empty-state">No items yet</div>';
+                // Show example items when empty
+                const examples = exampleItems[storeId] || ['Item 1', 'Item 2', 'Item 3'];
+                list.innerHTML = examples.map((item, index) => `
+                    <li class="example-item" data-id="${index}">
+                        <div class="item-content">
+                            <span class="drag-handle">☰</span>
+                            <input type="checkbox" class="item-checkbox" disabled>
+                            <span class="item-text">${item}</span>
+                        </div>
+                        <div class="item-buttons">
+                            <button class="delete-btn" title="Delete">×</button>
+                        </div>
+                    </li>
+                `).join('');
                 clearLink.style.display = 'none';
             } else {
                 list.innerHTML = shoppingList[storeId].map((item, index) => `
@@ -922,10 +1235,10 @@
                         <div class="item-content">
                             <span class="drag-handle">☰</span>
                             <input type="checkbox" class="item-checkbox" onchange="window.checkItem('${storeId}', ${index})">
-                            <span class="item-text">${item}</span>
+                            <span class="item-text" onclick="window.editItem('${storeId}', ${index})">${item}</span>
                         </div>
                         <div class="item-buttons">
-                            <button class="delete-btn" onclick="window.deleteItem('${storeId}', ${index})" title="Delete">🗑️</button>
+                            <button class="delete-btn" onclick="window.deleteItem('${storeId}', ${index})" title="Delete">×</button>
                         </div>
                     </li>
                 `).join('');
@@ -978,6 +1291,7 @@
 
                 const section = document.createElement('div');
                 section.className = 'section';
+                section.setAttribute('data-store-id', storeId);
                 section.draggable = true;
                 section.ondragstart = (e) => handleSectionDragStart(e, storeId);
                 section.ondragover = handleSectionDragOver;
@@ -987,21 +1301,23 @@
                 section.ondragend = handleSectionDragEnd;
 
                 section.innerHTML = `
-                    <div class="section-header">
+                    <div class="section-header" onclick="window.toggleSection(this)">
                         <div class="section-title-wrapper">
-                            <h2>${store.emoji} ${store.name}</h2>
+                            <h2 onclick="event.stopPropagation(); window.renameStore('${storeId}')" style="cursor: pointer;">${store.emoji} ${store.name}</h2>
                         </div>
                         <div class="section-actions">
-                            <button class="rename-btn" onclick="window.renameStore('${storeId}')" title="Rename">✏️</button>
-                            <button class="delete-list-btn" onclick="window.deleteStore('${storeId}')" title="Delete">🗑️</button>
+                            <span class="collapse-icon">▼</span>
+                            <button class="delete-list-btn" onclick="event.stopPropagation(); window.deleteStore('${storeId}')" title="Delete">×</button>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <input type="text" id="${storeId}-input" placeholder="Add item...">
-                        <button class="add-btn" onclick="window.addItem('${storeId}')">Add</button>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <input type="text" id="${storeId}-input" placeholder="Add item...">
+                            <button class="add-btn" onclick="window.addItem('${storeId}')">+</button>
+                        </div>
+                        <ul id="${storeId}-list"></ul>
+                        <a href="#" class="clear-link" id="${storeId}-clear" onclick="window.clearSection('${storeId}'); return false;">clear all items</a>
                     </div>
-                    <ul id="${storeId}-list"></ul>
-                    <a href="#" class="clear-link" id="${storeId}-clear" onclick="window.clearSection('${storeId}'); return false;">clear all items</a>
                 `;
 
                 container.appendChild(section);
@@ -1038,7 +1354,7 @@
                             </div>
                             <div class="item-buttons">
                                 <button class="buy-again-btn" onclick="window.buyAgain(${index})">Buy Again</button>
-                                <button class="delete-btn" onclick="window.deletePurchased(${index})" title="Delete">🗑️</button>
+                                <button class="delete-btn" onclick="window.deletePurchased(${index})" title="Delete">×</button>
                             </div>
                         </li>
                     `;

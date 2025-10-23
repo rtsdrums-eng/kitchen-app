@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen App</title>
+    <title>Mise Kitchen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,16 +29,81 @@
             font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--light-grey);
             min-height: 100vh;
-            padding: 40px 20px;
             color: var(--black);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--medium-grey);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            text-decoration: none;
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-btn:hover {
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        .logout-link {
+            color: var(--medium-grey);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .logout-link:hover {
+            color: var(--orange);
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
+            margin: 0 auto;
+            padding: 60px 20px;
         }
 
         h1 {
@@ -60,9 +125,9 @@
 
         .main-features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 24px;
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto 40px;
         }
 
@@ -96,72 +161,60 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
         }
 
         .nav-card h2 {
-            color: var(--white);
-            font-size: 1.3rem;
+            color: var(--black);
+            font-size: 1rem;
             font-weight: 700;
             text-align: center;
             position: absolute;
-            bottom: 16px;
-            left: 0;
-            right: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 2;
-            text-shadow: 0 2px 12px rgba(0,0,0,0.8);
-            padding: 0 16px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
 
         /* Individual background images */
         .nav-card-inventory .nav-card-image {
-            background-image: url('https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=600&h=400&fit=crop');
+            background-image: url('https://images.unsplash.com/photo-1556911220-bff31c812dba?w=600&h=400&fit=crop');
         }
 
         .nav-card-recipes .nav-card-image {
-            background-image: url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop');
+            background-image: url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop');
         }
 
         .nav-card-shopping .nav-card-image {
             background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop');
         }
 
-        /* Secondary links - minimal style */
-        .secondary-links {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            flex-wrap: wrap;
-            margin-top: 32px;
+        .nav-card-planner .nav-card-image {
+            background-image: url('https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=600&h=400&fit=crop');
         }
 
-        .secondary-link {
-            color: var(--medium-grey);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .secondary-link:hover {
-            color: var(--orange);
-            background: var(--orange-light);
-        }
-
-        .coming-soon {
-            color: var(--medium-grey);
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 8px 12px;
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
 
         @media (max-width: 768px) {
-            body {
-                padding: 24px 16px;
+            .navbar {
+                padding: 12px 16px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-right {
+                gap: 12px;
+            }
+
+            .container {
+                padding: 40px 16px;
             }
 
             h1 {
@@ -177,49 +230,66 @@
             .main-features {
                 grid-template-columns: 1fr;
             }
-
-            .secondary-links {
-                flex-direction: column;
-                align-items: center;
-                gap: 12px;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="app-content" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <span id="user-email" style="color: var(--medium-grey); font-size: 14px;"></span>
-            <button onclick="handleLogout()" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s;">Log Out</button>
-        </div>
+    <div id="app-content" style="display: none;">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="navbar-left">
+                <a href="index.html" class="navbar-brand">Mise Kitchen</a>
+            </div>
+            <div class="navbar-right">
+                <a href="household.html" class="icon-btn" title="Household Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </a>
+                <a href="help.html" class="icon-btn" title="Help & Feedback">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </a>
+                <a href="#" onclick="handleLogout(); return false;" class="logout-link">Log Out</a>
+            </div>
+        </nav>
 
-        <h1>Kitchen App</h1>
-        <p class="subtitle">Manage your kitchen, plan your meals, and discover recipes</p>
+        <!-- Main Content -->
+        <div class="container">
+            <h1>Mise Kitchen</h1>
+            <p class="subtitle">Everything in its place - manage your kitchen with ease</p>
 
-        <div class="main-features">
-            <a href="inventory.html" class="nav-card nav-card-inventory">
-                <div class="nav-card-image">
-                    <h2>Kitchen Inventory</h2>
-                </div>
-            </a>
+            <div class="main-features">
+                <a href="inventory.html" class="nav-card nav-card-inventory">
+                    <div class="nav-card-image">
+                        <h2>Kitchen Inventory</h2>
+                    </div>
+                </a>
 
-            <a href="shopping.html" class="nav-card nav-card-shopping">
-                <div class="nav-card-image">
-                    <h2>Shopping Lists</h2>
-                </div>
-            </a>
+                <a href="shopping.html" class="nav-card nav-card-shopping">
+                    <div class="nav-card-image">
+                        <h2>Shopping Lists</h2>
+                    </div>
+                </a>
 
-            <a href="recipes.html" class="nav-card nav-card-recipes">
-                <div class="nav-card-image">
-                    <h2>Recipe Suggestions</h2>
-                </div>
-            </a>
-        </div>
+                <a href="recipes.html" class="nav-card nav-card-recipes">
+                    <div class="nav-card-image">
+                        <h2>Recipe Suggestions</h2>
+                    </div>
+                </a>
 
-        <div class="secondary-links">
-            <span class="coming-soon">Meal Planner (Coming Soon)</span>
-            <a href="household.html" class="secondary-link">Household Settings</a>
-            <a href="help.html" class="secondary-link">Help & Feedback</a>
+                <a href="planner.html" class="nav-card nav-card-planner">
+                    <div class="nav-card-image">
+                        <h2>Meal Planner</h2>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -245,7 +315,6 @@
             if (user) {
                 // User is logged in
                 document.getElementById('app-content').style.display = 'block';
-                document.getElementById('user-email').textContent = user.email;
             } else {
                 // User is not logged in, redirect to login page
                 window.location.href = 'login.html';
