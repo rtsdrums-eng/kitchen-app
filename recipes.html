@@ -272,6 +272,21 @@
             if (userDoc.exists()) {
                 householdId = userDoc.data().householdId;
                 loadInventoryFromFirebase();
+            } else {
+                // User document doesn't exist - create it now (auto-repair)
+                householdId = 'household_' + user.uid;
+                await setDoc(doc(db, 'households', householdId), {
+                    name: 'My Household',
+                    createdAt: new Date().toISOString(),
+                    createdBy: user.uid,
+                    members: [user.uid]
+                });
+                await setDoc(doc(db, 'users', user.uid), {
+                    email: user.email,
+                    householdId: householdId,
+                    createdAt: new Date().toISOString()
+                });
+                loadInventoryFromFirebase();
             }
         });
 

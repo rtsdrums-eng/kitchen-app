@@ -390,6 +390,7 @@
                         });
 
                         showSuccess('Account created successfully!');
+                        // Redirect will happen via onAuthStateChanged
                     } catch (signupError) {
                         showLoading(false);
                         if (signupError.code === 'auth/email-already-in-use') {

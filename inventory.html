@@ -544,7 +544,27 @@
                 householdId = userDoc.data().householdId;
                 loadInventoryFromFirebase();
             } else {
-                alert('User data not found. Please contact support.');
+                // User document doesn't exist - create it now (auto-repair)
+                console.log('User document not found, creating account setup...');
+
+                // Create household first
+                householdId = 'household_' + user.uid;
+                const newHouseholdData = {
+                    name: 'My Household',
+                    createdAt: new Date().toISOString(),
+                    createdBy: user.uid,
+                    members: [user.uid]
+                };
+
+                await setDoc(doc(db, 'households', householdId), newHouseholdData);
+                await setDoc(doc(db, 'users', user.uid), {
+                    email: user.email,
+                    householdId: householdId,
+                    createdAt: new Date().toISOString()
+                });
+
+                console.log('Account setup complete, loading inventory...');
+                loadInventoryFromFirebase();
             }
         });
 
