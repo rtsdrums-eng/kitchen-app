@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrate Data - Kitchen App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-grey: #1a1a1a;
+            --medium-grey: #404040;
+            --light-grey: #e5e5e5;
+            --white: #ffffff;
+            --orange: #ff6b35;
+            --orange-hover: #e55a2b;
+            --orange-light: #fff5f2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-grey);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--black);
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .migrate-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--black);
+            margin-bottom: 20px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .info {
+            background: var(--orange-light);
+            border: 2px solid var(--orange);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .preview {
+            background: var(--light-grey);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .preview h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .preview ul {
+            list-style: disc;
+            margin-left: 20px;
+        }
+
+        .preview li {
+            margin-bottom: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--orange-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: var(--medium-grey);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message-success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #060;
+        }
+
+        .message-error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--medium-grey);
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="migrate-box">
+            <h1>📦 Migrate Your Data</h1>
+
+            <div class="info">
+                This tool will copy your old data from browser storage to Firebase so you can share it with your household.
+            </div>
+
+            <div id="message" class="message"></div>
+            <div id="loading" class="loading">Migrating data...</div>
+
+            <div id="preview-section">
+                <div id="preview" class="preview"></div>
+                <button class="btn btn-primary" id="migrate-btn" onclick="window.migrateData()">Migrate Data to Firebase</button>
+                <p style="text-align: center; font-size: 12px; color: var(--medium-grey); margin-top: 10px;">
+                    <a href="index.html" style="color: var(--orange);">← Back to Home</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
+            authDomain: "kitchen-app-48dfd.firebaseapp.com",
+            projectId: "kitchen-app-48dfd",
+            storageBucket: "kitchen-app-48dfd.firebasestorage.app",
+            messagingSenderId: "1085782615169",
+            appId: "1:1085782615169:web:c13f6604456b9f221c9980",
+            measurementId: "G-5QM7PRV02K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let householdId = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                householdId = userDoc.data().householdId;
+                showPreview();
+            }
+        });
+
+        function showPreview() {
+            const preview = document.getElementById('preview');
+            let html = '';
+
+            // Check inventory
+            const inventory = {
+                fridge: JSON.parse(localStorage.getItem('fridge')) || [],
+                freezer: JSON.parse(localStorage.getItem('freezer')) || [],
+                pantry: JSON.parse(localStorage.getItem('pantry')) || [],
+                spices: JSON.parse(localStorage.getItem('spices')) || []
+            };
+
+            const totalInventory = inventory.fridge.length + inventory.freezer.length +
+                                   inventory.pantry.length + inventory.spices.length;
+
+            if (totalInventory > 0) {
+                html += '<h3>📦 Kitchen Inventory (' + totalInventory + ' items)</h3>';
+                html += '<ul>';
+                if (inventory.fridge.length) html += '<li>Fridge: ' + inventory.fridge.length + ' items</li>';
+                if (inventory.freezer.length) html += '<li>Freezer: ' + inventory.freezer.length + ' items</li>';
+                if (inventory.pantry.length) html += '<li>Pantry: ' + inventory.pantry.length + ' items</li>';
+                if (inventory.spices.length) html += '<li>Spices: ' + inventory.spices.length + ' items</li>';
+                html += '</ul>';
+            }
+
+            // Check shopping data
+            const stores = JSON.parse(localStorage.getItem('shopping-stores')) || [];
+            const purchased = JSON.parse(localStorage.getItem('shopping-purchased')) || [];
+
+            let totalShopping = purchased.length;
+            stores.forEach(store => {
+                const items = JSON.parse(localStorage.getItem('shopping-' + store.id)) || [];
+                totalShopping += items.length;
+            });
+
+            if (totalShopping > 0) {
+                html += '<h3 style="margin-top: 15px;">🛒 Shopping Lists (' + totalShopping + ' items)</h3>';
+                html += '<ul>';
+                stores.forEach(store => {
+                    const items = JSON.parse(localStorage.getItem('shopping-' + store.id)) || [];
+                    if (items.length) html += '<li>' + store.name + ': ' + items.length + ' items</li>';
+                });
+                if (purchased.length) html += '<li>Recently Purchased: ' + purchased.length + ' items</li>';
+                html += '</ul>';
+            }
+
+            if (totalInventory === 0 && totalShopping === 0) {
+                html = '<p style="color: var(--medium-grey); font-style: italic;">No old data found in browser storage.</p>';
+                document.getElementById('migrate-btn').disabled = true;
+                document.getElementById('migrate-btn').textContent = 'No Data to Migrate';
+            }
+
+            preview.innerHTML = html;
+        }
+
+        window.migrateData = async function() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('preview-section').style.display = 'none';
+
+            try {
+                // Migrate inventory
+                const inventory = {
+                    fridge: JSON.parse(localStorage.getItem('fridge')) || [],
+                    freezer: JSON.parse(localStorage.getItem('freezer')) || [],
+                    pantry: JSON.parse(localStorage.getItem('pantry')) || [],
+                    spices: JSON.parse(localStorage.getItem('spices')) || []
+                };
+
+                await setDoc(doc(db, 'households', householdId, 'data', 'inventory'), inventory);
+
+                // Migrate shopping
+                const stores = JSON.parse(localStorage.getItem('shopping-stores')) || [];
+                const storeOrder = JSON.parse(localStorage.getItem('shopping-store-order')) || [];
+                const purchased = JSON.parse(localStorage.getItem('shopping-purchased')) || [];
+
+                const shoppingList = {};
+                stores.forEach(store => {
+                    shoppingList[store.id] = JSON.parse(localStorage.getItem('shopping-' + store.id)) || [];
+                });
+
+                await setDoc(doc(db, 'households', householdId, 'data', 'shopping'), {
+                    stores,
+                    storeOrder,
+                    shoppingList,
+                    purchased
+                });
+
+                showMessage('Data migrated successfully! Redirecting to home...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } catch (error) {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('preview-section').style.display = 'block';
+                showMessage('Error migrating data: ' + error.message, 'error');
+            }
+        };
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message message-' + type + ' show';
+        }
+    </script>
+</body>
+</html>
