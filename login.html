@@ -213,7 +213,7 @@
     <div class="container">
         <div class="login-box">
             <h1>🍽️ Kitchen App</h1>
-            <p class="subtitle">Sign in or create an account to get started</p>
+            <p class="subtitle" id="subtitle">Sign in or create an account to get started</p>
 
             <div id="error-message" class="error-message"></div>
             <div id="success-message" class="success-message"></div>
@@ -225,23 +225,18 @@
                     <input type="email" id="email" placeholder="you@example.com" required>
                 </div>
 
-                <button class="btn btn-primary" onclick="handleContinue()">Continue</button>
+                <button class="btn btn-primary" onclick="window.handleContinue()">Continue</button>
             </div>
 
             <div id="password-form" style="display: none;">
                 <div class="form-group">
-                    <label for="email-display">Email</label>
-                    <input type="email" id="email-display" disabled>
-                    <button type="button" onclick="goBack()" style="background: transparent; border: none; color: var(--orange); font-size: 12px; cursor: pointer; margin-top: 4px; padding: 0;">Change email</button>
-                </div>
-
-                <div class="form-group">
                     <label for="password" id="password-label">Password</label>
                     <input type="password" id="password" placeholder="Enter your password" required>
                     <div id="password-hint" style="font-size: 12px; color: var(--medium-grey); margin-top: 4px; display: none;">At least 6 characters</div>
+                    <button type="button" onclick="window.goBack()" style="background: transparent; border: none; color: var(--orange); font-size: 12px; cursor: pointer; margin-top: 8px; padding: 0; display: block;">← Change email</button>
                 </div>
 
-                <button class="btn btn-primary" id="submit-btn" onclick="handleSubmit()">Continue</button>
+                <button class="btn btn-primary" id="submit-btn" onclick="window.handleSubmit()">Continue</button>
             </div>
         </div>
     </div>
@@ -322,16 +317,17 @@
                 showLoading(false);
                 document.getElementById('email-form').style.display = 'none';
                 document.getElementById('password-form').style.display = 'block';
-                document.getElementById('email-display').value = email;
 
                 if (userExists) {
                     // Existing user - login
+                    document.getElementById('subtitle').textContent = 'Welcome back!';
                     document.getElementById('password-label').textContent = 'Password';
                     document.getElementById('password').placeholder = 'Enter your password';
                     document.getElementById('password-hint').style.display = 'none';
                     document.getElementById('submit-btn').textContent = 'Log In';
                 } else {
                     // New user - signup
+                    document.getElementById('subtitle').textContent = 'Create your account';
                     document.getElementById('password-label').textContent = 'Create Password';
                     document.getElementById('password').placeholder = 'At least 6 characters';
                     document.getElementById('password-hint').style.display = 'block';
@@ -410,6 +406,7 @@
         window.goBack = function() {
             document.getElementById('password-form').style.display = 'none';
             document.getElementById('email-form').style.display = 'block';
+            document.getElementById('subtitle').textContent = 'Sign in or create an account to get started';
             document.getElementById('password').value = '';
             document.getElementById('email').focus();
         };
