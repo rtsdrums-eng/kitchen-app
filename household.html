@@ -705,7 +705,6 @@
                         li.innerHTML = `
                             <div class="member-info">
                                 <span class="member-email">${invitation.inviteeEmail}</span>
-                                <span class="member-role">Sent ${new Date(invitation.createdAt).toLocaleDateString()}</span>
                             </div>
                             <div class="action-buttons">
                                 <button class="btn btn-secondary btn-small" onclick="window.copyPendingInviteLink('${inviteLink}', this)">Copy Link</button>
