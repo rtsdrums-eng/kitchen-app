@@ -58,47 +58,105 @@
             font-weight: 400;
         }
 
-        .nav-grid {
+        .main-features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 24px;
+            max-width: 900px;
+            margin: 0 auto 40px;
         }
 
         .nav-card {
+            text-decoration: none;
             background: var(--white);
             border-radius: 16px;
-            padding: 40px 32px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.06);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: block;
+            position: relative;
         }
 
         .nav-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            border-color: var(--orange);
         }
 
-        .nav-card-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
+        .nav-card-image {
+            width: 100%;
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .nav-card-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
         }
 
         .nav-card h2 {
-            color: var(--black);
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            letter-spacing: -0.01em;
+            color: var(--white);
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            position: absolute;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+            padding: 0 16px;
         }
 
-        .nav-card p {
+        /* Individual background images */
+        .nav-card-inventory .nav-card-image {
+            background-image: url('https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=600&h=400&fit=crop');
+        }
+
+        .nav-card-recipes .nav-card-image {
+            background-image: url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop');
+        }
+
+        .nav-card-shopping .nav-card-image {
+            background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop');
+        }
+
+        /* Secondary links - minimal style */
+        .secondary-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+
+        .secondary-link {
             color: var(--medium-grey);
-            font-size: 0.95rem;
-            line-height: 1.5;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .secondary-link:hover {
+            color: var(--orange);
+            background: var(--orange-light);
+        }
+
+        .coming-soon {
+            color: var(--medium-grey);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         @media (max-width: 768px) {
@@ -116,13 +174,14 @@
                 margin-bottom: 40px;
             }
 
-            .nav-grid {
+            .main-features {
                 grid-template-columns: 1fr;
-                gap: 16px;
             }
 
-            .nav-card {
-                padding: 32px 24px;
+            .secondary-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
             }
         }
     </style>
@@ -134,45 +193,33 @@
             <button onclick="handleLogout()" style="background: var(--white); color: var(--black); padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s;">Log Out</button>
         </div>
 
-        <h1>🍽️ Kitchen App</h1>
+        <h1>Kitchen App</h1>
         <p class="subtitle">Manage your kitchen, plan your meals, and discover recipes</p>
 
-        <div class="nav-grid">
-            <a href="inventory.html" class="nav-card">
-                <div class="nav-card-icon">📦</div>
-                <h2>Kitchen Inventory</h2>
-                <p>Track what's in your fridge, freezer, pantry, and spice cabinet</p>
+        <div class="main-features">
+            <a href="inventory.html" class="nav-card nav-card-inventory">
+                <div class="nav-card-image">
+                    <h2>Kitchen Inventory</h2>
+                </div>
             </a>
 
-            <a href="recipes.html" class="nav-card">
-                <div class="nav-card-icon">🍳</div>
-                <h2>Recipe Suggestions</h2>
-                <p>Discover recipes based on ingredients you already have</p>
+            <a href="shopping.html" class="nav-card nav-card-shopping">
+                <div class="nav-card-image">
+                    <h2>Shopping Lists</h2>
+                </div>
             </a>
 
-            <a href="shopping.html" class="nav-card">
-                <div class="nav-card-icon">🛒</div>
-                <h2>Shopping List</h2>
-                <p>Create and manage your grocery shopping list</p>
+            <a href="recipes.html" class="nav-card nav-card-recipes">
+                <div class="nav-card-image">
+                    <h2>Recipe Suggestions</h2>
+                </div>
             </a>
+        </div>
 
-            <a href="planner.html" class="nav-card">
-                <div class="nav-card-icon">📅</div>
-                <h2>Meal Planner</h2>
-                <p>Plan your meals for the week ahead</p>
-            </a>
-
-            <a href="household.html" class="nav-card">
-                <div class="nav-card-icon">👥</div>
-                <h2>Household Settings</h2>
-                <p>Manage your household members and invitations</p>
-            </a>
-
-            <a href="help.html" class="nav-card">
-                <div class="nav-card-icon">💬</div>
-                <h2>Help & Feedback</h2>
-                <p>Get help or send us your feedback and suggestions</p>
-            </a>
+        <div class="secondary-links">
+            <span class="coming-soon">Meal Planner (Coming Soon)</span>
+            <a href="household.html" class="secondary-link">Household Settings</a>
+            <a href="help.html" class="secondary-link">Help & Feedback</a>
         </div>
     </div>
 
