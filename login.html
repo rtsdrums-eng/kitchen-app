@@ -339,19 +339,8 @@
                 document.getElementById('password').focus();
             } catch (error) {
                 showLoading(false);
-                // If Firestore query fails (permission issue), just show neutral form
-                console.log('Could not check user existence:', error);
-                userExists = false; // Assume new user
-                userEmail = email;
-
-                document.getElementById('email-form').style.display = 'none';
-                document.getElementById('password-form').style.display = 'block';
-                document.getElementById('subtitle').textContent = 'Enter your password';
-                document.getElementById('password-label').textContent = 'Password';
-                document.getElementById('password').placeholder = 'Enter your password';
-                document.getElementById('password-hint').style.display = 'none';
-                document.getElementById('submit-btn').textContent = 'Continue';
-                document.getElementById('password').focus();
+                showError('Error checking email. Please try again.');
+                console.error('Email check error:', error);
             }
         };
 
