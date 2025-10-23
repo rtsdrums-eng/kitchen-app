@@ -243,7 +243,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -274,9 +274,11 @@
             const errorDiv = document.getElementById('error-message');
             errorDiv.textContent = message;
             errorDiv.classList.add('show');
-            setTimeout(() => {
-                errorDiv.classList.remove('show');
-            }, 5000);
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.classList.remove('show');
         }
 
         function showSuccess(message) {
@@ -306,11 +308,9 @@
             showLoading(true);
 
             try {
-                // Check if user exists by querying Firestore
-                const usersQuery = query(collection(db, 'users'), where('email', '==', email.toLowerCase()));
-                const usersSnapshot = await getDocs(usersQuery);
-
-                userExists = !usersSnapshot.empty;
+                // Check if user exists using Firebase Auth
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+                userExists = signInMethods.length > 0;
                 userEmail = email;
 
                 // Show password form
@@ -404,6 +404,7 @@
 
         // Go back to email form
         window.goBack = function() {
+            hideError();
             document.getElementById('password-form').style.display = 'none';
             document.getElementById('email-form').style.display = 'block';
             document.getElementById('subtitle').textContent = 'Sign in or create an account to get started';
@@ -411,12 +412,14 @@
             document.getElementById('email').focus();
         };
 
-        // Add Enter key support
+        // Add Enter key support and hide errors when typing
         document.getElementById('email').addEventListener('keypress', (e) => {
+            hideError();
             if (e.key === 'Enter') handleContinue();
         });
 
         document.getElementById('password').addEventListener('keypress', (e) => {
+            hideError();
             if (e.key === 'Enter') handleSubmit();
         });
     </script>
