@@ -922,11 +922,8 @@
                     householdId: newHouseholdId
                 });
 
-                // Update invitation status
-                await updateDoc(doc(db, 'invitations', invitationId), {
-                    status: 'accepted',
-                    acceptedAt: new Date().toISOString()
-                });
+                // Delete the invitation (no need to keep it after acceptance)
+                await deleteDoc(doc(db, 'invitations', invitationId));
 
                 showMessage('Invitation accepted! Reloading...', 'success');
                 setTimeout(() => {

@@ -327,22 +327,15 @@
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
                 householdId = userDoc.data().householdId;
-                loadInventoryFromFirebase();
+                if (householdId) {
+                    loadInventoryFromFirebase();
+                } else {
+                    console.error('User document exists but has no householdId');
+                    alert('Account setup incomplete. Please contact support.');
+                }
             } else {
-                // User document doesn't exist - create it now (auto-repair)
-                householdId = 'household_' + user.uid;
-                await setDoc(doc(db, 'households', householdId), {
-                    name: 'My Household',
-                    createdAt: new Date().toISOString(),
-                    createdBy: user.uid,
-                    members: [user.uid]
-                });
-                await setDoc(doc(db, 'users', user.uid), {
-                    email: user.email,
-                    householdId: householdId,
-                    createdAt: new Date().toISOString()
-                });
-                loadInventoryFromFirebase();
+                console.error('User document not found');
+                alert('Account setup incomplete. Please log out and sign up again, or contact support.');
             }
         });
 
