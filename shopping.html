@@ -485,6 +485,24 @@
             background: var(--orange-hover);
         }
 
+        .purchased-item .delete-btn {
+            background: transparent;
+            color: var(--orange);
+            padding: 6px 10px;
+            font-size: 18px;
+            font-weight: 300;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .purchased-item .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
         .edit-input {
             flex: 1;
             padding: 8px 12px;
@@ -975,6 +993,19 @@
         }
         window.addItem = addItem;
 
+        // Edit example item (convert to real item)
+        async function editExampleItem(storeId, exampleText) {
+            // Add a new item with the example text pre-filled
+            shoppingList[storeId].unshift(exampleText);
+            await saveShoppingDataToFirebase();
+
+            // Now edit it immediately
+            setTimeout(() => {
+                editItem(storeId, 0);
+            }, 100);
+        }
+        window.editExampleItem = editExampleItem;
+
         // Edit item
         function editItem(storeId, index) {
             const item = shoppingList[storeId][index];
@@ -1271,17 +1302,17 @@
             if (!list || !clearLink) return;
 
             if (shoppingList[storeId].length === 0) {
-                // Show example items when empty
-                const examples = exampleItems[storeId] || ['Item 1', 'Item 2', 'Item 3'];
+                // Show example items when empty - clicking them converts to real items
+                const examples = exampleItems[storeId] || ['Milk', 'Bread', 'Eggs'];
                 list.innerHTML = examples.map((item, index) => `
                     <li class="example-item" data-id="${index}">
                         <div class="item-content">
                             <span class="drag-handle">☰</span>
                             <input type="checkbox" class="item-checkbox" disabled>
-                            <span class="item-text">${item}</span>
+                            <span class="item-text" onclick="window.editExampleItem('${storeId}', '${item}')">${item}</span>
                         </div>
                         <div class="item-buttons">
-                            <button class="delete-btn" title="Delete">×</button>
+                            <button class="menu-btn">⋯</button>
                         </div>
                     </li>
                 `).join('');

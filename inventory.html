@@ -810,6 +810,19 @@
             });
         }
 
+        // Edit example item (convert to real item)
+        async function editExampleItem(section, exampleText) {
+            // Add a new item with the example text pre-filled
+            inventory[section].unshift(exampleText);
+            await saveInventoryToFirebase();
+
+            // Now edit it immediately
+            setTimeout(() => {
+                editItem(section, 0);
+            }, 100);
+        }
+        window.editExampleItem = editExampleItem;
+
         // Add item to a section
         async function addItem(section) {
             const input = document.getElementById(`${section}-input`);
@@ -933,15 +946,15 @@
             const clearLink = document.getElementById(`${section}-clear`);
 
             if (inventory[section].length === 0) {
-                // Show example items when empty
+                // Show example items when empty - clicking them converts to real items
                 list.innerHTML = exampleItems[section].map((item, index) => `
                     <li class="example-item" data-id="${index}">
                         <div class="item-content">
                             <span class="drag-handle">☰</span>
-                            <span class="item-text">${item}</span>
+                            <span class="item-text" onclick="window.editExampleItem('${section}', '${item}')">${item}</span>
                         </div>
                         <div class="item-buttons">
-                            <button class="delete-btn" title="Delete">×</button>
+                            <button class="menu-btn">⋯</button>
                         </div>
                     </li>
                 `).join('');
