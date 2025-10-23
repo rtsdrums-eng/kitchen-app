@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root {
             --black: #0a0a0a;
@@ -151,11 +152,40 @@
             align-items: center;
             transition: all 0.2s;
             border: 1px solid var(--light-grey);
+            cursor: move;
         }
 
         li:hover {
             border-color: var(--medium-grey);
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        li.sortable-ghost {
+            opacity: 0.4;
+            background: var(--orange-light);
+        }
+
+        li.sortable-drag {
+            opacity: 0.9;
+            cursor: grabbing;
+        }
+
+        .drag-handle {
+            color: var(--medium-grey);
+            font-size: 18px;
+            margin-right: 10px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .item-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
         }
 
         li span {
@@ -731,8 +761,11 @@
                 clearLink.style.display = 'none';
             } else {
                 list.innerHTML = inventory[section].map((item, index) => `
-                    <li>
-                        <span>${item}</span>
+                    <li data-id="${index}">
+                        <div class="item-content">
+                            <span class="drag-handle">☰</span>
+                            <span>${item}</span>
+                        </div>
                         <div class="item-buttons">
                             <button class="edit-btn" onclick="window.editItem('${section}', ${index})" title="Edit">✏️</button>
                             <button class="delete-btn" onclick="window.deleteItem('${section}', ${index})" title="Delete">🗑️</button>
@@ -740,7 +773,40 @@
                     </li>
                 `).join('');
                 clearLink.style.display = 'block';
+
+                // Initialize Sortable for this list
+                initializeSortable(section);
             }
+        }
+
+        // Initialize SortableJS for drag and drop
+        function initializeSortable(section) {
+            const listElement = document.getElementById(`${section}-list`);
+
+            new Sortable(listElement, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function (evt) {
+                    // Get the new order from the DOM
+                    const newOrder = [];
+                    const items = listElement.querySelectorAll('li');
+                    items.forEach(li => {
+                        const oldIndex = parseInt(li.dataset.id);
+                        newOrder.push(inventory[section][oldIndex]);
+                    });
+
+                    // Update the inventory array
+                    inventory[section] = newOrder;
+
+                    // Save to Firebase
+                    saveInventoryToFirebase();
+
+                    // Re-render to update data-id attributes
+                    renderSection(section);
+                }
+            });
         }
 
         // Render all sections

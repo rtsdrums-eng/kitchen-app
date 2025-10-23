@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root {
             --black: #0a0a0a;
@@ -227,20 +228,26 @@
             align-items: center;
             transition: all 0.2s;
             border: 1px solid var(--light-grey);
-            cursor: grab;
-        }
-
-        li:active {
-            cursor: grabbing;
-        }
-
-        li.dragging {
-            opacity: 0.5;
+            cursor: move;
         }
 
         li:hover {
             border-color: var(--medium-grey);
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        li.sortable-ghost {
+            opacity: 0.4;
+            background: var(--orange-light);
+        }
+
+        li.sortable-drag {
+            opacity: 0.9;
+            cursor: grabbing;
+        }
+
+        li.dragging {
+            opacity: 0.5;
         }
 
         .item-content {
@@ -911,13 +918,7 @@
                 clearLink.style.display = 'none';
             } else {
                 list.innerHTML = shoppingList[storeId].map((item, index) => `
-                    <li draggable="true"
-                        ondragstart="window.handleDragStart(event, '${storeId}', ${index})"
-                        ondragover="window.handleDragOver(event)"
-                        ondragenter="window.handleDragEnter(event)"
-                        ondragleave="window.handleDragLeave(event)"
-                        ondrop="window.handleDrop(event, '${storeId}', ${index})"
-                        ondragend="window.handleDragEnd(event)">
+                    <li data-id="${index}">
                         <div class="item-content">
                             <span class="drag-handle">☰</span>
                             <input type="checkbox" class="item-checkbox" onchange="window.checkItem('${storeId}', ${index})">
@@ -929,7 +930,41 @@
                     </li>
                 `).join('');
                 clearLink.style.display = 'block';
+
+                // Initialize Sortable for this list
+                initializeSortable(storeId);
             }
+        }
+
+        // Initialize SortableJS for drag and drop
+        function initializeSortable(storeId) {
+            const listElement = document.getElementById(`${storeId}-list`);
+            if (!listElement) return;
+
+            new Sortable(listElement, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: async function (evt) {
+                    // Get the new order from the DOM
+                    const newOrder = [];
+                    const items = listElement.querySelectorAll('li');
+                    items.forEach(li => {
+                        const oldIndex = parseInt(li.dataset.id);
+                        newOrder.push(shoppingList[storeId][oldIndex]);
+                    });
+
+                    // Update the shopping list array
+                    shoppingList[storeId] = newOrder;
+
+                    // Save to Firebase
+                    await saveShoppingDataToFirebase();
+
+                    // Re-render to update data-id attributes
+                    renderList(storeId);
+                }
+            });
         }
 
         // Render all store lists
