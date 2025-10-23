@@ -244,7 +244,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
@@ -296,28 +296,63 @@
             document.getElementById('password-form').style.display = show ? 'none' : 'block';
         }
 
-        // Step 1: Just move to password entry
+        // Step 1: Check if user exists in Firestore
         window.handleContinue = async function() {
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
 
             if (!email) {
                 showError('Please enter your email address');
                 return;
             }
 
-            userEmail = email;
+            showLoading(true);
 
-            // Show password form (we'll determine login vs signup on submit)
-            document.getElementById('email-form').style.display = 'none';
-            document.getElementById('password-form').style.display = 'block';
-            document.getElementById('subtitle').textContent = 'Enter your password';
-            document.getElementById('password-label').textContent = 'Password';
-            document.getElementById('password').placeholder = 'Enter your password';
-            document.getElementById('password-hint').style.display = 'none';
-            document.getElementById('submit-btn').textContent = 'Continue';
+            try {
+                // Check Firestore for existing user
+                const usersQuery = query(collection(db, 'users'), where('email', '==', email));
+                const usersSnapshot = await getDocs(usersQuery);
+                userExists = !usersSnapshot.empty;
+                userEmail = email;
 
-            // Focus password field
-            document.getElementById('password').focus();
+                // Show password form
+                showLoading(false);
+                document.getElementById('email-form').style.display = 'none';
+                document.getElementById('password-form').style.display = 'block';
+
+                if (userExists) {
+                    // Existing user - login
+                    document.getElementById('subtitle').textContent = 'Welcome back!';
+                    document.getElementById('password-label').textContent = 'Password';
+                    document.getElementById('password').placeholder = 'Enter your password';
+                    document.getElementById('password-hint').style.display = 'none';
+                    document.getElementById('submit-btn').textContent = 'Log In';
+                } else {
+                    // New user - signup
+                    document.getElementById('subtitle').textContent = 'Create your account';
+                    document.getElementById('password-label').textContent = 'Create Password';
+                    document.getElementById('password').placeholder = 'At least 6 characters';
+                    document.getElementById('password-hint').style.display = 'block';
+                    document.getElementById('submit-btn').textContent = 'Create Account';
+                }
+
+                // Focus password field
+                document.getElementById('password').focus();
+            } catch (error) {
+                showLoading(false);
+                // If Firestore query fails (permission issue), just show neutral form
+                console.log('Could not check user existence:', error);
+                userExists = false; // Assume new user
+                userEmail = email;
+
+                document.getElementById('email-form').style.display = 'none';
+                document.getElementById('password-form').style.display = 'block';
+                document.getElementById('subtitle').textContent = 'Enter your password';
+                document.getElementById('password-label').textContent = 'Password';
+                document.getElementById('password').placeholder = 'Enter your password';
+                document.getElementById('password-hint').style.display = 'none';
+                document.getElementById('submit-btn').textContent = 'Continue';
+                document.getElementById('password').focus();
+            }
         };
 
         // Step 2: Try to login first, create account if user not found
