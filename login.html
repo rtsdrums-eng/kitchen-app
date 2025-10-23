@@ -219,22 +219,29 @@
             <div id="success-message" class="success-message"></div>
             <div id="loading" class="loading">Loading...</div>
 
-            <div id="login-form">
+            <div id="email-form">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" placeholder="you@example.com" required>
                 </div>
 
+                <button class="btn btn-primary" onclick="handleContinue()">Continue</button>
+            </div>
+
+            <div id="password-form" style="display: none;">
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <label for="email-display">Email</label>
+                    <input type="email" id="email-display" disabled>
+                    <button type="button" onclick="goBack()" style="background: transparent; border: none; color: var(--orange); font-size: 12px; cursor: pointer; margin-top: 4px; padding: 0;">Change email</button>
                 </div>
 
-                <button class="btn btn-primary" onclick="handleLogin()">Log In</button>
+                <div class="form-group">
+                    <label for="password" id="password-label">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <div id="password-hint" style="font-size: 12px; color: var(--medium-grey); margin-top: 4px; display: none;">At least 6 characters</div>
+                </div>
 
-                <div class="divider">or</div>
-
-                <button class="btn btn-secondary" onclick="handleSignup()">Create Account</button>
+                <button class="btn btn-primary" id="submit-btn" onclick="handleSubmit()">Continue</button>
             </div>
         </div>
     </div>
@@ -242,7 +249,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
@@ -258,14 +265,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Make functions global
-        window.handleLogin = handleLogin;
-        window.handleSignup = handleSignup;
+        let userExists = false;
+        let userEmail = '';
 
         // Check if user is already logged in
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is signed in, redirect to home
                 window.location.href = 'index.html';
             }
         });
@@ -290,48 +295,67 @@
 
         function showLoading(show) {
             document.getElementById('loading').classList.toggle('show', show);
-            document.getElementById('login-form').style.display = show ? 'none' : 'block';
+            document.getElementById('email-form').style.display = show ? 'none' : 'block';
+            document.getElementById('password-form').style.display = show ? 'none' : 'block';
         }
 
-        async function handleLogin() {
+        // Step 1: Check if email exists
+        window.handleContinue = async function() {
             const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
 
-            if (!email || !password) {
-                showError('Please enter both email and password');
+            if (!email) {
+                showError('Please enter your email address');
                 return;
             }
 
             showLoading(true);
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                showSuccess('Logged in successfully!');
-                // Redirect will happen automatically via onAuthStateChanged
+                // Check if user exists by querying Firestore
+                const usersQuery = query(collection(db, 'users'), where('email', '==', email.toLowerCase()));
+                const usersSnapshot = await getDocs(usersQuery);
+
+                userExists = !usersSnapshot.empty;
+                userEmail = email;
+
+                // Show password form
+                showLoading(false);
+                document.getElementById('email-form').style.display = 'none';
+                document.getElementById('password-form').style.display = 'block';
+                document.getElementById('email-display').value = email;
+
+                if (userExists) {
+                    // Existing user - login
+                    document.getElementById('password-label').textContent = 'Password';
+                    document.getElementById('password').placeholder = 'Enter your password';
+                    document.getElementById('password-hint').style.display = 'none';
+                    document.getElementById('submit-btn').textContent = 'Log In';
+                } else {
+                    // New user - signup
+                    document.getElementById('password-label').textContent = 'Create Password';
+                    document.getElementById('password').placeholder = 'At least 6 characters';
+                    document.getElementById('password-hint').style.display = 'block';
+                    document.getElementById('submit-btn').textContent = 'Create Account';
+                }
+
+                // Focus password field
+                document.getElementById('password').focus();
             } catch (error) {
                 showLoading(false);
-                if (error.code === 'auth/user-not-found') {
-                    showError('No account found with this email');
-                } else if (error.code === 'auth/wrong-password') {
-                    showError('Incorrect password');
-                } else if (error.code === 'auth/invalid-email') {
-                    showError('Invalid email address');
-                } else {
-                    showError('Login failed: ' + error.message);
-                }
+                showError('Error checking email: ' + error.message);
             }
-        }
+        };
 
-        async function handleSignup() {
-            const email = document.getElementById('email').value.trim();
+        // Step 2: Submit (login or signup based on userExists)
+        window.handleSubmit = async function() {
             const password = document.getElementById('password').value;
 
-            if (!email || !password) {
-                showError('Please enter both email and password');
+            if (!password) {
+                showError('Please enter a password');
                 return;
             }
 
-            if (password.length < 6) {
+            if (!userExists && password.length < 6) {
                 showError('Password must be at least 6 characters');
                 return;
             }
@@ -339,50 +363,64 @@
             showLoading(true);
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+                if (userExists) {
+                    // Login
+                    await signInWithEmailAndPassword(auth, userEmail, password);
+                    showSuccess('Logged in successfully!');
+                } else {
+                    // Signup
+                    const userCredential = await createUserWithEmailAndPassword(auth, userEmail, password);
+                    const user = userCredential.user;
 
-                // Create a new household for this user
-                const householdId = 'household_' + user.uid;
+                    // Create household
+                    const householdId = 'household_' + user.uid;
+                    await setDoc(doc(db, 'households', householdId), {
+                        name: 'My Household',
+                        createdAt: new Date().toISOString(),
+                        createdBy: user.uid,
+                        members: [user.uid]
+                    });
 
-                // Create household document
-                await setDoc(doc(db, 'households', householdId), {
-                    name: 'My Household',
-                    createdAt: new Date().toISOString(),
-                    createdBy: user.uid,
-                    members: [user.uid]
-                });
+                    // Create user document
+                    await setDoc(doc(db, 'users', user.uid), {
+                        email: user.email,
+                        householdId: householdId,
+                        createdAt: new Date().toISOString()
+                    });
 
-                // Create user document
-                await setDoc(doc(db, 'users', user.uid), {
-                    email: user.email,
-                    householdId: householdId,
-                    createdAt: new Date().toISOString()
-                });
-
-                showSuccess('Account created successfully!');
-                // Redirect will happen automatically via onAuthStateChanged
+                    showSuccess('Account created successfully!');
+                }
             } catch (error) {
                 showLoading(false);
-                if (error.code === 'auth/email-already-in-use') {
-                    showError('An account with this email already exists');
+                if (error.code === 'auth/wrong-password') {
+                    showError('Incorrect password');
                 } else if (error.code === 'auth/invalid-email') {
                     showError('Invalid email address');
-                } else if (error.code === 'auth/weak-password') {
-                    showError('Password is too weak');
+                } else if (error.code === 'auth/user-not-found') {
+                    showError('Account not found');
+                } else if (error.code === 'auth/email-already-in-use') {
+                    showError('Email already in use');
                 } else {
-                    showError('Signup failed: ' + error.message);
+                    showError('Error: ' + error.message);
                 }
             }
-        }
+        };
+
+        // Go back to email form
+        window.goBack = function() {
+            document.getElementById('password-form').style.display = 'none';
+            document.getElementById('email-form').style.display = 'block';
+            document.getElementById('password').value = '';
+            document.getElementById('email').focus();
+        };
 
         // Add Enter key support
         document.getElementById('email').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') document.getElementById('password').focus();
+            if (e.key === 'Enter') handleContinue();
         });
 
         document.getElementById('password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
+            if (e.key === 'Enter') handleSubmit();
         });
     </script>
 </body>
