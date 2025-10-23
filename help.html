@@ -372,6 +372,8 @@ Submitted: ${new Date(formData.timestamp).toLocaleString()}
         document.getElementById('contact-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            console.log('Form submitted!');
+
             // Disable submit button to prevent double submission
             const submitBtn = this.querySelector('.submit-btn');
             const originalText = submitBtn.textContent;
@@ -389,22 +391,31 @@ Submitted: ${new Date(formData.timestamp).toLocaleString()}
                 userEmail: window.currentUser ? window.currentUser.email : 'anonymous'
             };
 
+            console.log('Form data:', formData);
+            console.log('window.submitFeedback exists?', typeof window.submitFeedback);
+
             // Save to Firebase
-            const success = await window.submitFeedback(formData);
+            if (window.submitFeedback) {
+                const success = await window.submitFeedback(formData);
+                console.log('Submit success?', success);
 
-            if (success) {
-                // Show success message
-                document.getElementById('success-message').classList.add('show');
+                if (success) {
+                    // Show success message
+                    document.getElementById('success-message').classList.add('show');
 
-                // Reset form
-                document.getElementById('contact-form').reset();
+                    // Reset form
+                    document.getElementById('contact-form').reset();
 
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    document.getElementById('success-message').classList.remove('show');
-                }, 5000);
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('success-message').classList.remove('show');
+                    }, 5000);
+                } else {
+                    alert('Sorry, there was an error sending your feedback. Please try again.');
+                }
             } else {
-                alert('Sorry, there was an error sending your feedback. Please try again.');
+                console.error('window.submitFeedback is not defined!');
+                alert('Feedback system not ready. Please try again in a moment.');
             }
 
             // Re-enable submit button
