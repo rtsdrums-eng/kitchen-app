@@ -524,6 +524,13 @@
                 document.getElementById('household-name-input').disabled = false;
                 document.getElementById('save-household-btn').disabled = false;
                 document.getElementById('household-loading').style.display = 'none';
+
+                // Add Enter key support
+                document.getElementById('household-name-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        updateHouseholdName();
+                    }
+                });
             } catch (error) {
                 console.error('Error loading household:', error);
                 showMessage('Error loading household data: ' + error.message, 'error');
@@ -658,11 +665,7 @@
                 // Create shareable link
                 const inviteLink = window.location.origin + window.location.pathname.replace('household.html', 'accept-invite.html') + '?id=' + invitationRef.id;
 
-                if (inviteeId) {
-                    showInviteLink(email, inviteLink, 'Invitation sent! Share this link with them:');
-                } else {
-                    showInviteLink(email, inviteLink, 'Invitation created! Send this link to ' + email + ':');
-                }
+                showInviteLink(email, inviteLink);
 
                 document.getElementById('invite-email-input').value = '';
                 await loadSentInvitations();
@@ -695,6 +698,8 @@
 
                     snapshot.forEach((docSnap) => {
                         const invitation = docSnap.data();
+                        const inviteLink = window.location.origin + window.location.pathname.replace('household.html', 'accept-invite.html') + '?id=' + docSnap.id;
+
                         const li = document.createElement('li');
                         li.className = 'invitation-item';
                         li.innerHTML = `
@@ -703,6 +708,7 @@
                                 <span class="member-role">Sent ${new Date(invitation.createdAt).toLocaleDateString()}</span>
                             </div>
                             <div class="action-buttons">
+                                <button class="btn btn-secondary btn-small" onclick="window.copyPendingInviteLink('${inviteLink}', this)">Copy Link</button>
                                 <button class="btn btn-danger btn-small" onclick="window.cancelInvitation('${docSnap.id}')">Cancel</button>
                             </div>
                         `;
@@ -711,6 +717,38 @@
                 }
             });
         }
+
+        // Copy pending invitation link
+        window.copyPendingInviteLink = async function(link, buttonElement) {
+            try {
+                await navigator.clipboard.writeText(link);
+                const originalText = buttonElement.textContent;
+                buttonElement.textContent = 'Copied!';
+                buttonElement.classList.add('copied');
+
+                setTimeout(() => {
+                    buttonElement.textContent = originalText;
+                    buttonElement.classList.remove('copied');
+                }, 2000);
+            } catch (error) {
+                // Fallback for older browsers
+                const tempInput = document.createElement('input');
+                tempInput.value = link;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
+                const originalText = buttonElement.textContent;
+                buttonElement.textContent = 'Copied!';
+                buttonElement.classList.add('copied');
+
+                setTimeout(() => {
+                    buttonElement.textContent = originalText;
+                    buttonElement.classList.remove('copied');
+                }, 2000);
+            }
+        };
 
         // Cancel invitation
         async function cancelInvitation(invitationId) {
@@ -856,12 +894,12 @@
         }
 
         // Show invitation link
-        function showInviteLink(email, link, title) {
+        function showInviteLink(email, link) {
             const linkSection = document.getElementById('invite-link-section');
             linkSection.style.display = 'block';
             linkSection.innerHTML = `
                 <div class="invite-link-box">
-                    <div class="invite-link-title">✨ Invite Link Created!</div>
+                    <div class="invite-link-title">✨ Invite Link Ready!</div>
                     <div class="invite-link-container">
                         <input type="text" class="invite-link-input" value="${link}" readonly id="invite-link-input">
                         <button class="copy-btn" onclick="window.copyInviteLink()">Copy Link</button>
