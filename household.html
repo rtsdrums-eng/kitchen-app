@@ -447,13 +447,27 @@
 
             currentUser = user;
 
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-                householdId = userDoc.data().householdId;
-                await loadHouseholdData();
-                await loadMembers();
-                await loadSentInvitations();
-                await loadReceivedInvitations();
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+                console.log('User document exists:', userDoc.exists());
+                console.log('User data:', userDoc.data());
+
+                if (userDoc.exists()) {
+                    householdId = userDoc.data().householdId;
+                    console.log('Household ID:', householdId);
+
+                    await loadHouseholdData();
+                    await loadMembers();
+                    await loadSentInvitations();
+                    await loadReceivedInvitations();
+                } else {
+                    showMessage('User document not found. Your account may not be set up correctly.', 'error');
+                    console.error('User document does not exist for:', user.uid);
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showMessage('Error loading user data: ' + error.message, 'error');
             }
         });
 
