@@ -243,8 +243,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
@@ -296,7 +296,7 @@
             document.getElementById('password-form').style.display = show ? 'none' : 'block';
         }
 
-        // Step 1: Check if email exists
+        // Step 1: Just move to password entry
         window.handleContinue = async function() {
             const email = document.getElementById('email').value.trim();
 
@@ -305,44 +305,22 @@
                 return;
             }
 
-            showLoading(true);
+            userEmail = email;
 
-            try {
-                // Check if user exists using Firebase Auth
-                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-                userExists = signInMethods.length > 0;
-                userEmail = email;
+            // Show password form (we'll determine login vs signup on submit)
+            document.getElementById('email-form').style.display = 'none';
+            document.getElementById('password-form').style.display = 'block';
+            document.getElementById('subtitle').textContent = 'Enter your password';
+            document.getElementById('password-label').textContent = 'Password';
+            document.getElementById('password').placeholder = 'Enter your password';
+            document.getElementById('password-hint').style.display = 'none';
+            document.getElementById('submit-btn').textContent = 'Continue';
 
-                // Show password form
-                showLoading(false);
-                document.getElementById('email-form').style.display = 'none';
-                document.getElementById('password-form').style.display = 'block';
-
-                if (userExists) {
-                    // Existing user - login
-                    document.getElementById('subtitle').textContent = 'Welcome back!';
-                    document.getElementById('password-label').textContent = 'Password';
-                    document.getElementById('password').placeholder = 'Enter your password';
-                    document.getElementById('password-hint').style.display = 'none';
-                    document.getElementById('submit-btn').textContent = 'Log In';
-                } else {
-                    // New user - signup
-                    document.getElementById('subtitle').textContent = 'Create your account';
-                    document.getElementById('password-label').textContent = 'Create Password';
-                    document.getElementById('password').placeholder = 'At least 6 characters';
-                    document.getElementById('password-hint').style.display = 'block';
-                    document.getElementById('submit-btn').textContent = 'Create Account';
-                }
-
-                // Focus password field
-                document.getElementById('password').focus();
-            } catch (error) {
-                showLoading(false);
-                showError('Error checking email: ' + error.message);
-            }
+            // Focus password field
+            document.getElementById('password').focus();
         };
 
-        // Step 2: Submit (login or signup based on userExists)
+        // Step 2: Try to login first, create account if user not found
         window.handleSubmit = async function() {
             const password = document.getElementById('password').value;
 
@@ -351,52 +329,61 @@
                 return;
             }
 
-            if (!userExists && password.length < 6) {
-                showError('Password must be at least 6 characters');
-                return;
-            }
-
             showLoading(true);
 
             try {
-                if (userExists) {
-                    // Login
-                    await signInWithEmailAndPassword(auth, userEmail, password);
-                    showSuccess('Logged in successfully!');
-                } else {
-                    // Signup
-                    const userCredential = await createUserWithEmailAndPassword(auth, userEmail, password);
-                    const user = userCredential.user;
-
-                    // Create household
-                    const householdId = 'household_' + user.uid;
-                    await setDoc(doc(db, 'households', householdId), {
-                        name: 'My Household',
-                        createdAt: new Date().toISOString(),
-                        createdBy: user.uid,
-                        members: [user.uid]
-                    });
-
-                    // Create user document
-                    await setDoc(doc(db, 'users', user.uid), {
-                        email: user.email,
-                        householdId: householdId,
-                        createdAt: new Date().toISOString()
-                    });
-
-                    showSuccess('Account created successfully!');
-                }
+                // Try to login first
+                await signInWithEmailAndPassword(auth, userEmail, password);
+                showSuccess('Logged in successfully!');
             } catch (error) {
-                showLoading(false);
-                if (error.code === 'auth/wrong-password') {
-                    showError('Incorrect password');
+                // If user not found, try to create account
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    // User doesn't exist - create account
+                    if (password.length < 6) {
+                        showLoading(false);
+                        showError('Password must be at least 6 characters');
+                        return;
+                    }
+
+                    try {
+                        const userCredential = await createUserWithEmailAndPassword(auth, userEmail, password);
+                        const user = userCredential.user;
+
+                        // Create household
+                        const householdId = 'household_' + user.uid;
+                        await setDoc(doc(db, 'households', householdId), {
+                            name: 'My Household',
+                            createdAt: new Date().toISOString(),
+                            createdBy: user.uid,
+                            members: [user.uid]
+                        });
+
+                        // Create user document
+                        await setDoc(doc(db, 'users', user.uid), {
+                            email: user.email,
+                            householdId: householdId,
+                            createdAt: new Date().toISOString()
+                        });
+
+                        showSuccess('Account created successfully!');
+                    } catch (signupError) {
+                        showLoading(false);
+                        if (signupError.code === 'auth/email-already-in-use') {
+                            showError('Email already in use. Please use a different email.');
+                        } else if (signupError.code === 'auth/weak-password') {
+                            showError('Password is too weak. Please use at least 6 characters.');
+                        } else {
+                            showError('Error creating account: ' + signupError.message);
+                        }
+                    }
+                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    showLoading(false);
+                    showError('Incorrect password. Please try again.');
                 } else if (error.code === 'auth/invalid-email') {
+                    showLoading(false);
                     showError('Invalid email address');
-                } else if (error.code === 'auth/user-not-found') {
-                    showError('Account not found');
-                } else if (error.code === 'auth/email-already-in-use') {
-                    showError('Email already in use');
                 } else {
+                    showLoading(false);
                     showError('Error: ' + error.message);
                 }
             }
