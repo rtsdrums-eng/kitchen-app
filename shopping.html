@@ -794,6 +794,13 @@
                     if (data.storeOrder) storeOrder = data.storeOrder;
                     if (data.shoppingList) shoppingList = data.shoppingList;
                     if (data.purchased) purchased = data.purchased;
+
+                    // Ensure all stores have an array in shoppingList (fix for missing stores)
+                    stores.forEach(store => {
+                        if (!shoppingList[store.id]) {
+                            shoppingList[store.id] = [];
+                        }
+                    });
                 } else {
                     // Initialize with defaults if no data exists
                     stores = defaultStores;
@@ -997,7 +1004,7 @@
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     e.preventDefault();
-                    renderList(storeId);
+                    renderSection(storeId);
                 }
             });
 
@@ -1011,14 +1018,17 @@
         // Save edited item
         async function saveEdit(storeId, index) {
             const input = document.getElementById(`edit-${storeId}-${index}`);
+            if (!input) return; // Already saved/cancelled
+
             const newValue = input.value.trim();
 
             if (newValue) {
                 shoppingList[storeId][index] = newValue;
                 await saveShoppingDataToFirebase();
-            } else {
-                renderList(storeId);
             }
+
+            // Always re-render to show updated item or revert to original
+            renderSection(storeId);
         }
         window.saveEdit = saveEdit;
 

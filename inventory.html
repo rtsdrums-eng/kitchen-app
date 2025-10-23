@@ -866,14 +866,17 @@
         // Save edited item
         async function saveEdit(section, index) {
             const input = document.getElementById(`edit-${section}-${index}`);
+            if (!input) return; // Already saved/cancelled
+
             const newValue = input.value.trim();
 
             if (newValue) {
                 inventory[section][index] = newValue;
                 await saveInventoryToFirebase();
-            } else {
-                renderSection(section);
             }
+
+            // Always re-render to show updated item or revert to original
+            renderSection(section);
         }
         window.saveEdit = saveEdit;
 
