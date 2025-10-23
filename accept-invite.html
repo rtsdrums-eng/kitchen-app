@@ -237,22 +237,16 @@
         <div class="invite-box">
             <div class="invite-icon">👋</div>
             <h1>You're Invited!</h1>
-            <p class="subtitle" id="subtitle">Loading invitation...</p>
+            <p class="subtitle" id="subtitle">Loading...</p>
 
             <div id="loading" class="loading show">Loading...</div>
             <div id="error-message" class="error-message"></div>
             <div id="success-message" class="success-message"></div>
 
             <div id="invitation-content" style="display: none;">
-                <div class="household-info">
-                    <div class="household-name" id="household-name"></div>
-                    <div class="inviter-info">Invited by <span id="inviter-email"></span></div>
-                </div>
+                <p id="invitation-message" style="text-align: center; margin-bottom: 30px; color: var(--black); font-size: 16px; line-height: 1.6;"></p>
 
                 <div id="login-form" style="display: none;">
-                    <p style="text-align: center; margin-bottom: 20px; color: var(--medium-grey); font-size: 14px;">
-                        You already have an account. Please log in to accept this invitation.
-                    </p>
                     <div class="form-group">
                         <label for="login-email">Email</label>
                         <input type="email" id="login-email" disabled>
@@ -261,16 +255,13 @@
                         <label for="login-password">Password</label>
                         <input type="password" id="login-password" placeholder="Enter your password">
                     </div>
-                    <button class="btn btn-primary" onclick="window.handleLogin()">Log In & Accept Invitation</button>
-                    <div class="link-text">
+                    <button class="btn btn-primary" onclick="window.handleLogin()">Accept Invitation</button>
+                    <div class="link-text" style="margin-top: 20px; font-size: 12px;">
                         <a href="login.html">Cancel</a>
                     </div>
                 </div>
 
                 <div id="signup-form" style="display: none;">
-                    <p style="text-align: center; margin-bottom: 20px; color: var(--medium-grey); font-size: 14px;">
-                        Create your account to accept this invitation.
-                    </p>
                     <div class="form-group">
                         <label for="signup-email">Email</label>
                         <input type="email" id="signup-email" disabled>
@@ -279,8 +270,8 @@
                         <label for="signup-password">Create Password</label>
                         <input type="password" id="signup-password" placeholder="At least 6 characters">
                     </div>
-                    <button class="btn btn-primary" onclick="window.handleSignup()">Create Account & Accept Invitation</button>
-                    <div class="link-text">
+                    <button class="btn btn-primary" onclick="window.handleSignup()">Accept Invitation</button>
+                    <div class="link-text" style="margin-top: 20px; font-size: 11px; color: var(--medium-grey);">
                         Already have an account? <a href="#" onclick="window.switchToLogin(); return false;">Log in instead</a>
                     </div>
                 </div>
@@ -338,10 +329,10 @@
                     return;
                 }
 
-                // Display invitation details
-                document.getElementById('household-name').textContent = invitationData.householdName;
-                document.getElementById('inviter-email').textContent = invitationData.inviterEmail;
-                document.getElementById('subtitle').textContent = 'Join ' + invitationData.householdName;
+                // Display invitation message
+                document.getElementById('subtitle').textContent = '';
+                const messageElement = document.getElementById('invitation-message');
+                messageElement.innerHTML = `You've been invited to join the household <em>${invitationData.householdName}</em>. Create a password to get started!`;
 
                 // Check if user exists
                 const usersQuery = query(collection(db, 'users'), where('email', '==', invitationData.inviteeEmail));
@@ -353,7 +344,8 @@
                 document.getElementById('invitation-content').style.display = 'block';
 
                 if (userExists) {
-                    // Show login form
+                    // Show login form - update message
+                    messageElement.innerHTML = `You've been invited to join the household <em>${invitationData.householdName}</em>. Log in to accept!`;
                     document.getElementById('login-email').value = invitationData.inviteeEmail;
                     document.getElementById('login-form').style.display = 'block';
                 } else {
