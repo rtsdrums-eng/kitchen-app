@@ -34,6 +34,12 @@
             padding: 0;
         }
 
+        #app-content {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         /* Navigation Bar */
         .navbar {
             background: var(--white);
@@ -196,12 +202,23 @@
             width: 100%;
             margin: 0 auto;
             padding: 60px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .container > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
         }
 
         h1 {
             text-align: center;
             color: var(--black);
-            margin-bottom: 60px;
+            margin: 0;
             font-size: 3.5rem;
             font-weight: 700;
             letter-spacing: -0.02em;
@@ -220,7 +237,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 24px;
             max-width: 800px;
-            margin: 0 auto 40px;
+            width: 100%;
         }
 
         .nav-card {
@@ -310,9 +327,13 @@
                 padding: 40px 16px;
             }
 
+            .container > div {
+                gap: 40px;
+            }
+
             h1 {
                 font-size: 2.5rem;
-                margin-bottom: 16px;
+                margin: 0;
             }
 
             .subtitle {
@@ -373,32 +394,34 @@
 
         <!-- Main Content -->
         <div class="container">
-            <h1>Mise Kitchen</h1>
+            <div>
+                <h1>Mise Kitchen</h1>
 
-            <div class="main-features">
-                <a href="shopping.html" class="nav-card nav-card-shopping">
-                    <div class="nav-card-image">
-                        <h2>Shopping Lists</h2>
-                    </div>
-                </a>
+                <div class="main-features">
+                    <a href="shopping.html" class="nav-card nav-card-shopping">
+                        <div class="nav-card-image">
+                            <h2>Shopping Lists</h2>
+                        </div>
+                    </a>
 
-                <a href="inventory.html" class="nav-card nav-card-inventory">
-                    <div class="nav-card-image">
-                        <h2>Kitchen Inventory</h2>
-                    </div>
-                </a>
+                    <a href="inventory.html" class="nav-card nav-card-inventory">
+                        <div class="nav-card-image">
+                            <h2>Kitchen Inventory</h2>
+                        </div>
+                    </a>
 
-                <a href="recipes.html" class="nav-card nav-card-recipes">
-                    <div class="nav-card-image">
-                        <h2>Recipe Suggestions</h2>
-                    </div>
-                </a>
+                    <a href="recipes.html" class="nav-card nav-card-recipes">
+                        <div class="nav-card-image">
+                            <h2>Recipe Suggestions</h2>
+                        </div>
+                    </a>
 
-                <a href="household.html" class="nav-card nav-card-household">
-                    <div class="nav-card-image">
-                        <h2>Manage Household</h2>
-                    </div>
-                </a>
+                    <a href="household.html" class="nav-card nav-card-household">
+                        <div class="nav-card-image">
+                            <h2>Manage Household</h2>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
