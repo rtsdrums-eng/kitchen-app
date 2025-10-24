@@ -356,20 +356,12 @@
             showLoading(true);
 
             try {
-                // First, check if user exists
-                const signInMethods = await fetchSignInMethodsForEmail(auth, userEmail);
-                const userExists = signInMethods.length > 0;
-
-                if (userExists) {
-                    // User exists - try to sign in
-                    try {
-                        await signInWithEmailAndPassword(auth, userEmail, password);
-                        showSuccess('Logged in successfully!');
-                    } catch (loginError) {
-                        showLoading(false);
-                        showError('Incorrect password. Please try again.');
-                    }
-                } else {
+                // Always try to sign in first
+                await signInWithEmailAndPassword(auth, userEmail, password);
+                showSuccess('Logged in successfully!');
+            } catch (error) {
+                // If sign in fails, determine why
+                if (error.code === 'auth/user-not-found') {
                     // User doesn't exist - create new account
                     if (password.length < 6) {
                         showLoading(false);
@@ -401,20 +393,21 @@
                         // Redirect will happen via onAuthStateChanged
                     } catch (signupError) {
                         showLoading(false);
-                        if (signupError.code === 'auth/email-already-in-use') {
-                            showError('This email is already registered. Please try logging in.');
-                        } else if (signupError.code === 'auth/weak-password') {
+                        if (signupError.code === 'auth/weak-password') {
                             showError('Password is too weak. Please use at least 6 characters.');
                         } else {
                             showError('Error creating account: ' + signupError.message);
                         }
                     }
-                }
-            } catch (error) {
-                showLoading(false);
-                if (error.code === 'auth/invalid-email') {
+                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
+                    // Wrong password - this is the key case
+                    showLoading(false);
+                    showError('Incorrect password. Please try again.');
+                } else if (error.code === 'auth/invalid-email') {
+                    showLoading(false);
                     showError('Invalid email address');
                 } else {
+                    showLoading(false);
                     showError('Error: ' + error.message);
                 }
             }
