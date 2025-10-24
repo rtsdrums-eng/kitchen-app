@@ -360,8 +360,8 @@
                 await signInWithEmailAndPassword(auth, userEmail, password);
                 showSuccess('Logged in successfully!');
             } catch (error) {
-                // If user not found, try to create account
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                // Handle different error cases
+                if (error.code === 'auth/user-not-found') {
                     // User doesn't exist - create account
                     if (password.length < 6) {
                         showLoading(false);
@@ -402,6 +402,7 @@
                         }
                     }
                 } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    // Wrong password for existing account
                     showLoading(false);
                     showError('Incorrect password. Please try again.');
                 } else if (error.code === 'auth/invalid-email') {
