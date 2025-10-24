@@ -300,6 +300,7 @@
         let invitationId = null;
         let invitationData = null;
         let userExists = false;
+        let isProcessing = false;
 
         // Get invitation ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -401,6 +402,9 @@
                 return;
             }
 
+            if (isProcessing) return;
+            isProcessing = true;
+
             showLoading(true);
 
             try {
@@ -432,6 +436,7 @@
                     window.location.href = 'index.html';
                 }, 2000);
             } catch (error) {
+                isProcessing = false;
                 showLoading(false);
                 if (error.code === 'auth/email-already-in-use') {
                     showError('An account with this email already exists. Please log in instead.');
@@ -443,7 +448,7 @@
 
         // Handle already logged in user
         onAuthStateChanged(auth, async (user) => {
-            if (user && invitationData) {
+            if (user && invitationData && !isProcessing) {
                 // User is already logged in
                 if (user.email.toLowerCase() === invitationData.inviteeEmail.toLowerCase()) {
                     // Correct user - accept invitation automatically
