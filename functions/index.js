@@ -8,6 +8,178 @@ admin.initializeApp();
 // Define secret for OpenAI API key
 const openaiKey = defineSecret('OPENAI_API_KEY');
 
+// Generate quick recipe list (names and descriptions only)
+exports.generateRecipeList = onRequest({
+  secrets: [openaiKey],
+  cors: true
+}, async (req, res) => {
+  // Initialize OpenAI client with secret
+  const openai = new OpenAI({
+    apiKey: openaiKey.value()
+  });
+
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      const {inventory} = req.body;
+
+      if (!inventory || typeof inventory !== 'object') {
+        return res.status(400).json({error: 'Invalid inventory data'});
+      }
+
+      // Flatten inventory into a single list
+      const allItems = [
+        ...(inventory.fridge || []),
+        ...(inventory.freezer || []),
+        ...(inventory.pantry || []),
+        ...(inventory.spices || [])
+      ].filter(item => item && item.trim());
+
+      if (allItems.length === 0) {
+        return res.status(400).json({error: 'Inventory is empty'});
+      }
+
+      // Call OpenAI API for quick list
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+        messages: [{
+          role: 'user',
+          content: `I have the following ingredients: ${allItems.join(', ')}
+
+Generate 10-15 recipe suggestions. For each recipe, ONLY include:
+- name
+- brief description (one sentence)
+- match percentage (how well it matches my ingredients)
+
+Format as JSON:
+{
+  "recipes": [
+    {
+      "id": "unique-recipe-id",
+      "name": "Recipe Name",
+      "description": "One sentence description",
+      "matchPercentage": 85
+    }
+  ]
+}
+
+Return ONLY valid JSON.`
+        }]
+      });
+
+      const responseText = completion.choices[0].message.content;
+      const data = JSON.parse(responseText);
+
+      if (!data.recipes || !Array.isArray(data.recipes)) {
+        throw new Error('Invalid recipe format');
+      }
+
+      return res.status(200).json({
+        success: true,
+        recipes: data.recipes
+      });
+
+    } catch (error) {
+    console.error('Error generating recipe list:', error);
+    return res.status(500).json({
+      error: 'Failed to generate recipe list',
+      message: error.message
+    });
+  }
+});
+
+// Generate full recipe details for a specific recipe
+exports.generateRecipeDetails = onRequest({
+  secrets: [openaiKey],
+  cors: true
+}, async (req, res) => {
+  // Initialize OpenAI client with secret
+  const openai = new OpenAI({
+    apiKey: openaiKey.value()
+  });
+
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+      return res.status(405).json({error: 'Method not allowed'});
+    }
+
+    try {
+      const {recipeName, inventory} = req.body;
+
+      if (!recipeName || !inventory) {
+        return res.status(400).json({error: 'Missing recipe name or inventory'});
+      }
+
+      // Flatten inventory into a single list
+      const allItems = [
+        ...(inventory.fridge || []),
+        ...(inventory.freezer || []),
+        ...(inventory.pantry || []),
+        ...(inventory.spices || [])
+      ].filter(item => item && item.trim());
+
+      // Call OpenAI API for full recipe
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+        messages: [{
+          role: 'user',
+          content: `I want to make: ${recipeName}
+
+I have these ingredients: ${allItems.join(', ')}
+
+Provide the COMPLETE recipe with:
+- Full ingredients list with measurements
+- Step-by-step directions
+- Cook time, servings, difficulty
+
+Format as JSON:
+{
+  "recipe": {
+    "name": "${recipeName}",
+    "description": "Brief description",
+    "cookTime": "30 minutes",
+    "servings": "4 servings",
+    "difficulty": "Easy",
+    "ingredients": ["2 cups rice", "1 lb chicken"],
+    "directions": ["Step 1", "Step 2"],
+    "matchedIngredients": ["rice", "chicken"],
+    "missingIngredients": ["salt", "pepper"]
+  }
+}
+
+Return ONLY valid JSON.`
+        }]
+      });
+
+      const responseText = completion.choices[0].message.content;
+      const data = JSON.parse(responseText);
+
+      if (!data.recipe) {
+        throw new Error('Invalid recipe format');
+      }
+
+      return res.status(200).json({
+        success: true,
+        recipe: data.recipe
+      });
+
+    } catch (error) {
+    console.error('Error generating recipe details:', error);
+    return res.status(500).json({
+      error: 'Failed to generate recipe details',
+      message: error.message
+    });
+  }
+});
+
+// Keep old function for backwards compatibility
 exports.generateRecipes = onRequest({
   secrets: [openaiKey],
   cors: true
