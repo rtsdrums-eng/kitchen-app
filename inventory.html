@@ -512,6 +512,120 @@
             background: var(--orange-hover);
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h3 {
+            margin: 0 0 16px 0;
+            font-size: 1.5rem;
+            color: var(--black);
+        }
+
+        .modal-content p {
+            margin: 0 0 24px 0;
+            color: var(--medium-grey);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--orange-hover);
+        }
+
+        .btn-secondary {
+            background: var(--light-grey);
+            color: var(--medium-grey);
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .shopping-list-selection {
+            margin-top: 24px;
+        }
+
+        .shopping-list-selection p {
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: var(--black);
+        }
+
+        #shopping-lists-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .shopping-list-btn {
+            padding: 16px;
+            background: var(--white);
+            border: 2px solid var(--light-grey);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .shopping-list-btn:hover {
+            border-color: var(--orange);
+            background: var(--orange-light);
+        }
+
+        .shopping-list-emoji {
+            font-size: 1.5rem;
+        }
+
         .count-badge {
             display: inline-flex;
             align-items: center;
@@ -672,6 +786,22 @@
         <div id="undo-toast" class="undo-toast">
             <span class="undo-toast-message" id="undo-message"></span>
             <button class="undo-btn" onclick="performUndo()">Undo</button>
+        </div>
+
+        <!-- Add to Shopping List Modal -->
+        <div id="add-to-shopping-modal" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-title">Add to Shopping List?</h3>
+                <p id="modal-message"></p>
+                <div id="modal-buttons" class="modal-buttons">
+                    <button class="btn-secondary" onclick="window.closeAddToShoppingModal()">No</button>
+                    <button class="btn-primary" onclick="window.showShoppingListSelection()">Yes</button>
+                </div>
+                <div id="shopping-list-selection" class="shopping-list-selection" style="display: none;">
+                    <p>Select a shopping list:</p>
+                    <div id="shopping-lists-container"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -912,16 +1042,29 @@
         }
         window.cancelEdit = cancelEdit;
 
+        // Store deleted item info for modal
+        let pendingDeletedItem = null;
+
         // Delete item from a section
         async function deleteItem(section, index) {
             const deletedItem = inventory[section][index];
+
+            // Store the item info for later
+            pendingDeletedItem = { name: deletedItem, section, index };
+
+            // Delete from inventory
             inventory[section].splice(index, 1);
             await saveInventoryToFirebase();
+
+            // Show modal asking if they want to add to shopping list
+            showAddToShoppingModal(deletedItem);
 
             // Show undo option
             showUndo(`Deleted "${deletedItem}"`, async () => {
                 inventory[section].splice(index, 0, deletedItem);
                 await saveInventoryToFirebase();
+                pendingDeletedItem = null;
+                closeAddToShoppingModal();
             });
         }
         window.deleteItem = deleteItem;
@@ -1066,6 +1209,115 @@
 
         // Make undo functions global
         window.performUndo = performUndo;
+
+        // Logout function
+        // Modal functions for "Add to Shopping List"
+        function showAddToShoppingModal(itemName) {
+            const modal = document.getElementById('add-to-shopping-modal');
+            document.getElementById('modal-message').textContent = `Do you want to add "${itemName}" to a shopping list?`;
+            document.getElementById('modal-buttons').style.display = 'flex';
+            document.getElementById('shopping-list-selection').style.display = 'none';
+            modal.classList.add('show');
+        }
+
+        async function showShoppingListSelection() {
+            // Hide the yes/no buttons
+            document.getElementById('modal-buttons').style.display = 'none';
+
+            // Show loading state
+            document.getElementById('shopping-list-selection').style.display = 'block';
+            const container = document.getElementById('shopping-lists-container');
+            container.innerHTML = '<p style="text-align: center; color: var(--medium-grey);">Loading shopping lists...</p>';
+
+            try {
+                // Fetch shopping lists from Firestore
+                const shoppingRef = doc(db, 'households', householdId, 'data', 'shopping');
+                const shoppingSnap = await getDoc(shoppingRef);
+
+                if (shoppingSnap.exists()) {
+                    const data = shoppingSnap.data();
+                    const stores = data.stores || [];
+
+                    if (stores.length === 0) {
+                        container.innerHTML = '<p style="text-align: center; color: var(--medium-grey);">No shopping lists found. Create one in the Shopping Lists page first.</p>';
+                        return;
+                    }
+
+                    // Render shopping list buttons
+                    container.innerHTML = stores.map(store => `
+                        <button class="shopping-list-btn" onclick="window.addToShoppingList('${store.id}', '${store.name}')">
+                            <span class="shopping-list-emoji">${store.emoji}</span>
+                            <span>${store.name}</span>
+                        </button>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="text-align: center; color: var(--medium-grey);">No shopping lists found. Create one in the Shopping Lists page first.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching shopping lists:', error);
+                container.innerHTML = '<p style="text-align: center; color: red;">Error loading shopping lists</p>';
+            }
+        }
+
+        async function addToShoppingList(storeId, storeName) {
+            if (!pendingDeletedItem) {
+                closeAddToShoppingModal();
+                return;
+            }
+
+            try {
+                // Fetch current shopping data
+                const shoppingRef = doc(db, 'households', householdId, 'data', 'shopping');
+                const shoppingSnap = await getDoc(shoppingRef);
+
+                if (shoppingSnap.exists()) {
+                    const data = shoppingSnap.data();
+                    const shoppingList = data.shoppingList || {};
+
+                    // Initialize array if it doesn't exist
+                    if (!shoppingList[storeId]) {
+                        shoppingList[storeId] = [];
+                    }
+
+                    // Add item to the list if it's not already there
+                    if (!shoppingList[storeId].includes(pendingDeletedItem.name)) {
+                        shoppingList[storeId].push(pendingDeletedItem.name);
+
+                        // Save back to Firestore
+                        await setDoc(shoppingRef, { ...data, shoppingList }, { merge: true });
+
+                        // Show success message
+                        document.getElementById('shopping-lists-container').innerHTML =
+                            `<p style="text-align: center; color: var(--orange); font-weight: 600;">✓ Added "${pendingDeletedItem.name}" to ${storeName}!</p>`;
+
+                        // Close modal after 1.5 seconds
+                        setTimeout(closeAddToShoppingModal, 1500);
+                    } else {
+                        document.getElementById('shopping-lists-container').innerHTML =
+                            `<p style="text-align: center; color: var(--medium-grey);">"${pendingDeletedItem.name}" is already in ${storeName}</p>`;
+                        setTimeout(closeAddToShoppingModal, 1500);
+                    }
+                }
+
+                pendingDeletedItem = null;
+            } catch (error) {
+                console.error('Error adding to shopping list:', error);
+                document.getElementById('shopping-lists-container').innerHTML =
+                    '<p style="text-align: center; color: red;">Error adding item</p>';
+            }
+        }
+
+        function closeAddToShoppingModal() {
+            const modal = document.getElementById('add-to-shopping-modal');
+            modal.classList.remove('show');
+            pendingDeletedItem = null;
+        }
+
+        // Make functions globally available
+        window.showAddToShoppingModal = showAddToShoppingModal;
+        window.showShoppingListSelection = showShoppingListSelection;
+        window.addToShoppingList = addToShoppingList;
+        window.closeAddToShoppingModal = closeAddToShoppingModal;
 
         // Logout function
         window.handleLogout = async function() {
