@@ -243,7 +243,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -356,15 +356,21 @@
             showLoading(true);
 
             try {
-                // Try to login first
-                await signInWithEmailAndPassword(auth, userEmail, password);
-                showSuccess('Logged in successfully!');
-            } catch (error) {
-                console.log('Login error code:', error.code); // Debug logging
+                // First, check if user exists
+                const signInMethods = await fetchSignInMethodsForEmail(auth, userEmail);
+                const userExists = signInMethods.length > 0;
 
-                // Handle different error cases
-                if (error.code === 'auth/user-not-found') {
-                    // User doesn't exist - create account
+                if (userExists) {
+                    // User exists - try to sign in
+                    try {
+                        await signInWithEmailAndPassword(auth, userEmail, password);
+                        showSuccess('Logged in successfully!');
+                    } catch (loginError) {
+                        showLoading(false);
+                        showError('Incorrect password. Please try again.');
+                    }
+                } else {
+                    // User doesn't exist - create new account
                     if (password.length < 6) {
                         showLoading(false);
                         showError('Password must be at least 6 characters');
@@ -396,22 +402,19 @@
                     } catch (signupError) {
                         showLoading(false);
                         if (signupError.code === 'auth/email-already-in-use') {
-                            showError('Incorrect password. Please try again.');
+                            showError('This email is already registered. Please try logging in.');
                         } else if (signupError.code === 'auth/weak-password') {
                             showError('Password is too weak. Please use at least 6 characters.');
                         } else {
                             showError('Error creating account: ' + signupError.message);
                         }
                     }
-                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
-                    // Wrong password for existing account
-                    showLoading(false);
-                    showError('Incorrect password. Please try again.');
-                } else if (error.code === 'auth/invalid-email') {
-                    showLoading(false);
+                }
+            } catch (error) {
+                showLoading(false);
+                if (error.code === 'auth/invalid-email') {
                     showError('Invalid email address');
                 } else {
-                    showLoading(false);
                     showError('Error: ' + error.message);
                 }
             }
