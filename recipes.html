@@ -253,6 +253,27 @@
             font-size: 1.1rem;
         }
 
+        .recipe-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .recipe-action-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        @media (max-width: 768px) {
+            .recipe-action-btn {
+                flex: 1;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 24px 16px;
@@ -555,6 +576,23 @@
                         </ul>
                     </div>
                 ` : ''}
+
+                <div class="recipe-actions">
+                    <button onclick="window.openChatGPT('${recipe.name.replace(/'/g, "\\'")}', event)"
+                            class="recipe-action-btn"
+                            style="background: var(--orange); color: white; border: none;"
+                            onmouseover="this.style.background='var(--orange-hover)'"
+                            onmouseout="this.style.background='var(--orange)'">
+                        💬 Chat with ChatGPT
+                    </button>
+                    <button onclick="window.copyRecipeToClipboard('${recipe.name.replace(/'/g, "\\'")}', event)"
+                            class="recipe-action-btn"
+                            style="background: var(--white); color: var(--orange); border: 2px solid var(--orange);"
+                            onmouseover="this.style.background='var(--orange-light)'"
+                            onmouseout="this.style.background='var(--white)'">
+                        📋 Copy Recipe
+                    </button>
+                </div>
             `;
         }
 
@@ -632,6 +670,89 @@
             }
         }
         window.toggleRecipe = toggleRecipe;
+
+        // Open ChatGPT conversation about recipe
+        window.openChatGPT = function(recipeName, event) {
+            event.stopPropagation(); // Prevent card toggle when clicking button
+
+            const recipeData = recipeDetails[recipeName];
+            let prompt = `I'm looking at a recipe for ${recipeName}.`;
+
+            if (recipeData) {
+                prompt += `\n\nIngredients:\n${recipeData.ingredients.join('\n')}`;
+                prompt += `\n\nDirections:\n${recipeData.directions.map((step, i) => `${i + 1}. ${step}`).join('\n')}`;
+            }
+
+            prompt += `\n\nCan you help me with questions about this recipe?`;
+
+            // Encode prompt for URL
+            const encodedPrompt = encodeURIComponent(prompt);
+
+            // Open ChatGPT with pre-filled prompt
+            window.open(`https://chat.openai.com/?q=${encodedPrompt}`, '_blank');
+        };
+
+        // Copy recipe to clipboard
+        window.copyRecipeToClipboard = async function(recipeName, event) {
+            event.stopPropagation(); // Prevent card toggle when clicking button
+
+            const recipeData = recipeDetails[recipeName];
+            if (!recipeData) {
+                alert('Recipe details not loaded yet. Please try again.');
+                return;
+            }
+
+            let recipeText = `${recipeName}\n${'='.repeat(recipeName.length)}\n\n`;
+
+            if (recipeData.cookTime || recipeData.servings || recipeData.difficulty) {
+                recipeText += `${recipeData.cookTime ? `⏱️ ${recipeData.cookTime}` : ''}`;
+                recipeText += `${recipeData.cookTime && recipeData.servings ? ' • ' : ''}`;
+                recipeText += `${recipeData.servings ? `🍽️ ${recipeData.servings}` : ''}`;
+                recipeText += `${recipeData.difficulty ? ` • ${recipeData.difficulty}` : ''}`;
+                recipeText += `\n\n`;
+            }
+
+            if (recipeData.description) {
+                recipeText += `${recipeData.description}\n\n`;
+            }
+
+            if (recipeData.ingredients && recipeData.ingredients.length > 0) {
+                recipeText += `INGREDIENTS:\n`;
+                recipeData.ingredients.forEach(ing => {
+                    recipeText += `• ${ing}\n`;
+                });
+                recipeText += `\n`;
+            }
+
+            if (recipeData.directions && recipeData.directions.length > 0) {
+                recipeText += `DIRECTIONS:\n`;
+                recipeData.directions.forEach((step, i) => {
+                    recipeText += `${i + 1}. ${step}\n`;
+                });
+            }
+
+            try {
+                await navigator.clipboard.writeText(recipeText);
+
+                // Show success feedback
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '✓ Copied!';
+                button.style.background = 'var(--orange)';
+                button.style.color = 'white';
+                button.style.borderColor = 'var(--orange)';
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = 'var(--white)';
+                    button.style.color = 'var(--orange)';
+                    button.style.borderColor = 'var(--orange)';
+                }, 2000);
+            } catch (error) {
+                alert('Failed to copy recipe. Please try again.');
+                console.error('Copy error:', error);
+            }
+        };
 
         // Logout function
         window.handleLogout = async function() {
