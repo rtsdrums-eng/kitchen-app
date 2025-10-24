@@ -169,7 +169,7 @@
 
 .dropdown-item:last-child {
     border-radius: 0 0 12px 12px;
-    color: var(--orange);
+    color: var(--black);
 }
 
 .dropdown-item:hover {
