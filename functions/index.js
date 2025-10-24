@@ -1,19 +1,21 @@
-const functions = require('firebase-functions');
+const {onRequest} = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const OpenAI = require('openai');
-const cors = require('cors')({origin: true});
+const {defineSecret} = require('firebase-functions/params');
 
 admin.initializeApp();
 
-// Initialize OpenAI client
-// You'll need to set your API key in Firebase config:
-// firebase functions:config:set openai.key="YOUR_API_KEY"
-const openai = new OpenAI({
-  apiKey: functions.config().openai?.key || process.env.OPENAI_API_KEY
-});
+// Define secret for OpenAI API key
+const openaiKey = defineSecret('OPENAI_API_KEY');
 
-exports.generateRecipes = functions.https.onRequest(async (req, res) => {
-  return cors(req, res, async () => {
+exports.generateRecipes = onRequest({
+  secrets: [openaiKey],
+  cors: true
+}, async (req, res) => {
+  // Initialize OpenAI client with secret
+  const openai = new OpenAI({
+    apiKey: openaiKey.value()
+  });
     // Only allow POST requests
     if (req.method !== 'POST') {
       return res.status(405).json({error: 'Method not allowed'});
@@ -91,11 +93,10 @@ Return ONLY valid JSON, no other text.`
       });
 
     } catch (error) {
-      console.error('Error generating recipes:', error);
-      return res.status(500).json({
-        error: 'Failed to generate recipes',
-        message: error.message
-      });
-    }
-  });
+    console.error('Error generating recipes:', error);
+    return res.status(500).json({
+      error: 'Failed to generate recipes',
+      message: error.message
+    });
+  }
 });
