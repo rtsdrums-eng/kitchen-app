@@ -382,137 +382,58 @@
             });
         }
 
-        // Recipe database
-        const recipes = [
-            {
-                name: "Knorr's Rice with Chicken & Vegetables",
-                description: "A quick and easy one-pot meal combining rice, protein, and veggies.",
-                ingredients: ["knorr", "rice", "chicken", "rotisserie", "peas", "carrots", "frozen peas", "frozen carrots"],
-                requiredCount: 3
-            },
-            {
-                name: "Pasta Primavera",
-                description: "Fresh pasta with seasonal vegetables and garlic.",
-                ingredients: ["pasta", "spaghetti", "penne", "vegetables", "garlic", "olive oil", "parmesan"],
-                requiredCount: 3
-            },
-            {
-                name: "Chicken Stir Fry",
-                description: "Quick stir fry with chicken, vegetables, and soy sauce over rice.",
-                ingredients: ["chicken", "rice", "soy sauce", "vegetables", "broccoli", "carrots", "bell pepper", "garlic", "ginger"],
-                requiredCount: 4
-            },
-            {
-                name: "Tacos",
-                description: "Classic tacos with your choice of protein and toppings.",
-                ingredients: ["tortilla", "taco", "ground beef", "chicken", "cheese", "lettuce", "tomato", "salsa", "sour cream"],
-                requiredCount: 3
-            },
-            {
-                name: "Grilled Cheese & Tomato Soup",
-                description: "Comfort food classic - crispy grilled cheese with warm tomato soup.",
-                ingredients: ["bread", "cheese", "butter", "tomato soup", "soup"],
-                requiredCount: 3
-            },
-            {
-                name: "Chicken Caesar Salad",
-                description: "Classic Caesar salad with grilled or rotisserie chicken.",
-                ingredients: ["chicken", "rotisserie", "lettuce", "romaine", "caesar", "parmesan", "croutons"],
-                requiredCount: 3
-            },
-            {
-                name: "Fried Rice",
-                description: "Quick fried rice with eggs, vegetables, and soy sauce.",
-                ingredients: ["rice", "egg", "soy sauce", "vegetables", "peas", "carrots", "green onion", "garlic"],
-                requiredCount: 4
-            },
-            {
-                name: "Spaghetti & Meatballs",
-                description: "Italian classic with pasta, meatballs, and marinara sauce.",
-                ingredients: ["spaghetti", "pasta", "meatball", "ground beef", "marinara", "tomato sauce", "parmesan", "basil"],
-                requiredCount: 3
-            },
-            {
-                name: "Quesadillas",
-                description: "Cheesy quesadillas with optional chicken or vegetables.",
-                ingredients: ["tortilla", "cheese", "chicken", "bell pepper", "onion", "salsa"],
-                requiredCount: 2
-            },
-            {
-                name: "Chicken Noodle Soup",
-                description: "Warm, comforting soup with chicken, noodles, and vegetables.",
-                ingredients: ["chicken", "noodle", "pasta", "broth", "stock", "carrots", "celery", "onion"],
-                requiredCount: 4
-            },
-            {
-                name: "Omelette",
-                description: "Fluffy omelette with your choice of fillings.",
-                ingredients: ["egg", "cheese", "milk", "vegetables", "bell pepper", "onion", "mushroom", "spinach"],
-                requiredCount: 2
-            },
-            {
-                name: "BLT Sandwich",
-                description: "Classic bacon, lettuce, and tomato sandwich.",
-                ingredients: ["bacon", "lettuce", "tomato", "bread", "mayo"],
-                requiredCount: 4
-            }
-        ];
-
-        // Get all items from inventory as lowercase
-        function getAllItems() {
-            return [
-                ...inventory.fridge,
-                ...inventory.freezer,
-                ...inventory.pantry,
-                ...inventory.spices
-            ].map(item => item.toLowerCase());
-        }
-
-        // Check if inventory contains ingredient (fuzzy match)
-        function hasIngredient(ingredient, items) {
-            return items.some(item =>
-                item.includes(ingredient.toLowerCase()) ||
-                ingredient.toLowerCase().includes(item)
-            );
-        }
-
-        // Find matching recipes
-        function findRecipes() {
-            const allItems = getAllItems();
+        // Find matching recipes using AI
+        async function findRecipes() {
             const recipeList = document.getElementById('recipe-list');
 
-            if (allItems.length === 0) {
+            // Check if inventory is empty
+            const hasItems = inventory.fridge.length > 0 ||
+                           inventory.freezer.length > 0 ||
+                           inventory.pantry.length > 0 ||
+                           inventory.spices.length > 0;
+
+            if (!hasItems) {
                 recipeList.innerHTML = '<div class="empty-state">Add items to your inventory to see recipe suggestions!</div>';
                 return;
             }
 
-            const matches = recipes.map(recipe => {
-                const matchedIngredients = recipe.ingredients.filter(ingredient =>
-                    hasIngredient(ingredient, allItems)
-                );
+            // Show loading state
+            recipeList.innerHTML = '<div class="empty-state">🤖 Generating personalized recipes with AI...</div>';
 
-                return {
-                    ...recipe,
-                    matchedIngredients,
-                    matchCount: matchedIngredients.length,
-                    matchPercentage: (matchedIngredients.length / recipe.ingredients.length) * 100
-                };
-            })
-            .filter(recipe => recipe.matchCount >= recipe.requiredCount)
-            .sort((a, b) => b.matchPercentage - a.matchPercentage);
+            try {
+                // Call Cloud Function to generate recipes
+                const response = await fetch('https://us-central1-kitchen-app-48dfd.cloudfunctions.net/generateRecipes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        inventory: inventory
+                    })
+                });
 
-            if (matches.length > 0) {
-                renderRecipes(matches);
-            } else {
-                recipeList.innerHTML = '<div class="empty-state">No recipes match your current inventory. Add more items to see suggestions!</div>';
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.recipes && data.recipes.length > 0) {
+                    renderRecipes(data.recipes);
+                } else {
+                    recipeList.innerHTML = '<div class="empty-state">No recipes found. Try adding more ingredients to your inventory!</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching recipes:', error);
+                recipeList.innerHTML = '<div class="empty-state" style="color: #c00;">Error generating recipes. Please try again later.</div>';
             }
         }
 
         // Render recipe suggestions
-        function renderRecipes(matches) {
+        function renderRecipes(recipes) {
             const recipeList = document.getElementById('recipe-list');
 
-            recipeList.innerHTML = matches.map((recipe, index) => `
+            recipeList.innerHTML = recipes.map((recipe, index) => `
                 <div class="recipe-card" onclick="window.toggleRecipe(${index})">
                     <div class="recipe-header">
                         <h4>
@@ -523,12 +444,21 @@
                     </div>
                     <div class="recipe-details">
                         <p>${recipe.description}</p>
+                        ${recipe.cookTime ? `<p style="font-size: 13px; color: var(--medium-grey); margin-bottom: 8px;">⏱️ ${recipe.cookTime} • ${recipe.difficulty || 'Medium'}</p>` : ''}
                         <div class="recipe-ingredients">
-                            <h5>Matched Ingredients (${recipe.matchCount})</h5>
+                            <h5>You Have (${recipe.matchedIngredients.length})</h5>
                             <ul>
                                 ${recipe.matchedIngredients.map(ing => `<li>${ing}</li>`).join('')}
                             </ul>
                         </div>
+                        ${recipe.missingIngredients && recipe.missingIngredients.length > 0 ? `
+                            <div class="recipe-ingredients" style="margin-top: 12px; opacity: 0.7;">
+                                <h5>Optional Additions (${recipe.missingIngredients.length})</h5>
+                                <ul>
+                                    ${recipe.missingIngredients.map(ing => `<li>${ing}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
