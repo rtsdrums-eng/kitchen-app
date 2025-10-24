@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="navbar-styles.css">
+    <script src="navbar-loader.js"></script>
     <style>
         :root {
             --black: #0a0a0a;
@@ -32,163 +34,6 @@
             color: var(--black);
             margin: 0;
             padding: 0;
-        }
-
-        /* Navigation Bar */
-        .navbar {
-            background: var(--white);
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        .navbar-left {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--black);
-            text-decoration: none;
-            letter-spacing: -0.02em;
-        }
-
-        .navbar-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .icon-btn {
-            background: transparent;
-            border: none;
-            color: var(--medium-grey);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            width: 40px;
-            height: 40px;
-        }
-
-        .icon-btn:hover {
-            background: var(--orange-light);
-            color: var(--orange);
-        }
-
-        .logout-link {
-            color: var(--medium-grey);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .logout-link:hover {
-            color: var(--orange);
-        }
-
-        /* Dropdown Menu */
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-toggle {
-            background: transparent;
-            border: none;
-            color: var(--medium-grey);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-
-        .dropdown-toggle:hover {
-            background: var(--orange-light);
-            color: var(--orange);
-        }
-
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: var(--white);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            min-width: 240px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.2s;
-            z-index: 1000;
-        }
-
-        .dropdown.active .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-email {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--light-grey);
-            font-size: 0.8rem;
-            color: var(--medium-grey);
-            font-weight: 500;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: var(--black);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.2s;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .dropdown-item:first-of-type {
-            border-radius: 12px 12px 0 0;
-        }
-
-        .dropdown-item:last-child {
-            border-radius: 0 0 12px 12px;
-            color: var(--orange);
-        }
-
-        .dropdown-item:hover {
-            background: var(--orange-light);
-        }
-
-        .dropdown-item svg {
-            width: 18px;
-            height: 18px;
-            opacity: 0.7;
         }
 
         .container {
@@ -238,53 +83,7 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="navbar-left">
-            <a href="index.html" class="icon-btn" title="Back">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </a>
-            <a href="index.html" class="navbar-brand">Mise Kitchen</a>
-        </div>
-        <div class="navbar-right">
-            <div class="dropdown">
-                <button class="dropdown-toggle" onclick="window.toggleDropdown(event)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                </button>
-                <div class="dropdown-menu">
-                    <div class="dropdown-email" id="user-email">Loading...</div>
-                    <a href="household.html" class="dropdown-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                        Manage Household
-                    </a>
-                    <a href="help.html" class="dropdown-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        Give Feedback
-                    </a>
-                    <button onclick="window.handleLogout()" class="dropdown-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Log Out
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <div id="navbar-placeholder"></div>
 
     <div class="container">
         <h1>Meal Planner</h1>
@@ -315,26 +114,20 @@
         // Check authentication status
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Display user email in dropdown
-                document.getElementById('user-email').textContent = user.email;
+                // Display user email in dropdown (wait for navbar to load)
+                const updateEmail = () => {
+                    const emailElement = document.getElementById('user-email');
+                    if (emailElement) {
+                        emailElement.textContent = user.email;
+                    } else {
+                        // Navbar not loaded yet, try again in a moment
+                        setTimeout(updateEmail, 100);
+                    }
+                };
+                updateEmail();
             } else {
                 // User is not logged in, redirect to login page
                 window.location.href = 'login.html';
-            }
-        });
-
-        // Toggle dropdown menu
-        window.toggleDropdown = function(event) {
-            event.stopPropagation();
-            const dropdown = event.target.closest('.dropdown');
-            dropdown.classList.toggle('active');
-        };
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function() {
-            const dropdown = document.querySelector('.dropdown');
-            if (dropdown) {
-                dropdown.classList.remove('active');
             }
         });
 
