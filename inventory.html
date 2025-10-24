@@ -1214,9 +1214,14 @@
         // Modal functions for "Add to Shopping List"
         function showAddToShoppingModal(itemName) {
             const modal = document.getElementById('add-to-shopping-modal');
+
+            // Reset all modal elements to initial state
+            document.getElementById('modal-title').style.display = 'block';
+            document.getElementById('modal-message').style.display = 'block';
             document.getElementById('modal-message').textContent = `Do you want to add "${itemName}" to a shopping list?`;
             document.getElementById('modal-buttons').style.display = 'flex';
             document.getElementById('shopping-list-selection').style.display = 'none';
+
             modal.classList.add('show');
         }
 
@@ -1286,19 +1291,26 @@
                         // Save back to Firestore
                         await setDoc(shoppingRef, { ...data, shoppingList }, { merge: true });
 
-                        // Show success message - hide title and previous content
-                        document.getElementById('modal-title').textContent = '';
-                        document.getElementById('shopping-list-selection').querySelector('p').style.display = 'none';
+                        // Show success message - hide all other elements
+                        document.getElementById('modal-title').style.display = 'none';
+                        document.getElementById('modal-message').style.display = 'none';
+                        const selectionP = document.querySelector('#shopping-list-selection > p');
+                        if (selectionP) selectionP.style.display = 'none';
+
                         document.getElementById('shopping-lists-container').innerHTML =
-                            `<p style="text-align: center; color: var(--orange); font-weight: 600; font-size: 1.2rem; padding: 20px;">✓ Added "${pendingDeletedItem.name}" to ${storeName}!</p>`;
+                            `<p style="text-align: center; color: var(--orange); font-weight: 600; font-size: 1.2rem; padding: 40px 20px;">✓ Added "${pendingDeletedItem.name}" to ${storeName}!</p>`;
 
                         // Close modal after 1.5 seconds
                         setTimeout(closeAddToShoppingModal, 1500);
                     } else {
-                        document.getElementById('modal-title').textContent = '';
-                        document.getElementById('shopping-list-selection').querySelector('p').style.display = 'none';
+                        // Item already exists message
+                        document.getElementById('modal-title').style.display = 'none';
+                        document.getElementById('modal-message').style.display = 'none';
+                        const selectionP = document.querySelector('#shopping-list-selection > p');
+                        if (selectionP) selectionP.style.display = 'none';
+
                         document.getElementById('shopping-lists-container').innerHTML =
-                            `<p style="text-align: center; color: var(--medium-grey); font-size: 1.1rem; padding: 20px;">"${pendingDeletedItem.name}" is already in ${storeName}</p>`;
+                            `<p style="text-align: center; color: var(--medium-grey); font-size: 1.1rem; padding: 40px 20px;">"${pendingDeletedItem.name}" is already in ${storeName}</p>`;
                         setTimeout(closeAddToShoppingModal, 1500);
                     }
                 }
