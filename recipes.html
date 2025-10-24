@@ -444,7 +444,31 @@
                     </div>
                     <div class="recipe-details">
                         <p>${recipe.description}</p>
-                        ${recipe.cookTime ? `<p style="font-size: 13px; color: var(--medium-grey); margin-bottom: 8px;">⏱️ ${recipe.cookTime} • ${recipe.difficulty || 'Medium'}</p>` : ''}
+                        ${recipe.cookTime || recipe.servings ? `<p style="font-size: 13px; color: var(--medium-grey); margin-bottom: 16px;">
+                            ${recipe.cookTime ? `⏱️ ${recipe.cookTime}` : ''}
+                            ${recipe.cookTime && recipe.servings ? ' • ' : ''}
+                            ${recipe.servings ? `🍽️ ${recipe.servings}` : ''}
+                            ${recipe.difficulty ? ` • ${recipe.difficulty}` : ''}
+                        </p>` : ''}
+
+                        ${recipe.ingredients && recipe.ingredients.length > 0 ? `
+                            <div class="recipe-ingredients" style="margin-bottom: 16px;">
+                                <h5>Ingredients</h5>
+                                <ul>
+                                    ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+
+                        ${recipe.directions && recipe.directions.length > 0 ? `
+                            <div class="recipe-ingredients" style="margin-bottom: 16px;">
+                                <h5>Directions</h5>
+                                <ol style="padding-left: 20px; list-style: decimal;">
+                                    ${recipe.directions.map(step => `<li style="margin-bottom: 8px;">${step}</li>`).join('')}
+                                </ol>
+                            </div>
+                        ` : ''}
+
                         <div class="recipe-ingredients">
                             <h5>You Have (${recipe.matchedIngredients.length})</h5>
                             <ul>

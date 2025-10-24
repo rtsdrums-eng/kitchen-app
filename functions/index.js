@@ -55,7 +55,7 @@ Please suggest 3-5 recipes I can make with these ingredients. For each recipe:
 1. Only suggest recipes where I have the ESSENTIAL ingredients (don't suggest "Chicken Parmesan" if I don't have chicken)
 2. Calculate a realistic match percentage based on how many of the recipe's ingredients I have
 3. It's okay if I'm missing minor ingredients like salt, pepper, oil - focus on main ingredients
-4. Include the recipe name, description, match percentage, and list of matched ingredients
+4. Include complete recipe details with specific amounts and step-by-step directions
 
 Format your response as a JSON object with a "recipes" array like this:
 {
@@ -67,7 +67,19 @@ Format your response as a JSON object with a "recipes" array like this:
       "matchedIngredients": ["ingredient1", "ingredient2", "ingredient3"],
       "missingIngredients": ["optional ingredient"],
       "cookTime": "30 minutes",
-      "difficulty": "Easy"
+      "difficulty": "Easy",
+      "servings": "4 servings",
+      "ingredients": [
+        "2 cups rice",
+        "1 lb chicken breast",
+        "1 tbsp olive oil"
+      ],
+      "directions": [
+        "Heat olive oil in a large pan over medium heat",
+        "Season and cook chicken until golden brown, about 6-8 minutes per side",
+        "Cook rice according to package directions",
+        "Slice chicken and serve over rice"
+      ]
     }
   ]
 }
