@@ -2,11 +2,12 @@
 
 ## Prerequisites
 
-1. **Anthropic API Key**
-   - Go to https://console.anthropic.com/
+1. **OpenAI API Key**
+   - Go to https://platform.openai.com/signup
    - Sign up or log in
-   - Navigate to API Keys section
-   - Create a new API key and copy it
+   - Add payment method and purchase credits (minimum $5)
+   - Navigate to API Keys section: https://platform.openai.com/api-keys
+   - Create a new API key and copy it immediately
 
 2. **Firebase Blaze Plan**
    - Go to https://console.firebase.google.com/
@@ -52,13 +53,13 @@ cd functions
 npm install
 ```
 
-### 5. Set Your Anthropic API Key
+### 5. Set Your OpenAI API Key
 
 ```bash
-firebase functions:config:set anthropic.key="YOUR_ANTHROPIC_API_KEY_HERE"
+firebase functions:config:set openai.key="YOUR_OPENAI_API_KEY_HERE"
 ```
 
-Replace `YOUR_ANTHROPIC_API_KEY_HERE` with your actual API key from step 1.
+Replace `YOUR_OPENAI_API_KEY_HERE` with your actual API key from step 1.
 
 ### 6. Deploy the Functions
 
@@ -77,7 +78,7 @@ Go to your app and navigate to the Recipe Suggestions page. Add some items to yo
 ## Cost Estimate
 
 - **Firebase Functions**: ~2 million free invocations/month, then $0.40 per million
-- **Claude API (Haiku model)**: ~$0.01-0.05 per recipe generation
+- **OpenAI API (GPT-4o-mini model)**: ~$0.01-0.03 per recipe generation
 - **Expected monthly cost for family use**: Less than $1-2/month
 
 ## Troubleshooting
@@ -85,7 +86,7 @@ Go to your app and navigate to the Recipe Suggestions page. Add some items to yo
 ### Error: "CORS policy"
 Make sure the CORS middleware is properly configured in `functions/index.js`
 
-### Error: "Anthropic API key not found"
+### Error: "OpenAI API key not found"
 Run: `firebase functions:config:get` to verify your API key is set
 
 ### Function not deploying
@@ -94,7 +95,8 @@ Run: `firebase functions:config:get` to verify your API key is set
 
 ### Recipe generation fails
 - Check function logs: `firebase functions:log`
-- Verify your Anthropic API key is valid at console.anthropic.com
+- Verify your OpenAI API key is valid at platform.openai.com
+- Make sure you have credits in your OpenAI account
 
 ## Local Testing (Optional)
 
@@ -102,7 +104,7 @@ To test functions locally before deploying:
 
 ```bash
 # Set environment variable for local testing
-export ANTHROPIC_API_KEY="your-api-key-here"
+export OPENAI_API_KEY="your-api-key-here"
 
 # Start emulators
 firebase emulators:start --only functions

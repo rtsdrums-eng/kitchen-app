@@ -1,15 +1,15 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 const cors = require('cors')({origin: true});
 
 admin.initializeApp();
 
-// Initialize Anthropic client
+// Initialize OpenAI client
 // You'll need to set your API key in Firebase config:
-// firebase functions:config:set anthropic.key="YOUR_API_KEY"
-const anthropic = new Anthropic({
-  apiKey: functions.config().anthropic?.key || process.env.ANTHROPIC_API_KEY
+// firebase functions:config:set openai.key="YOUR_API_KEY"
+const openai = new OpenAI({
+  apiKey: functions.config().openai?.key || process.env.OPENAI_API_KEY
 });
 
 exports.generateRecipes = functions.https.onRequest(async (req, res) => {
@@ -38,11 +38,11 @@ exports.generateRecipes = functions.https.onRequest(async (req, res) => {
         return res.status(400).json({error: 'Inventory is empty'});
       }
 
-      // Call Claude API
-      const message = await anthropic.messages.create({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 2048,
+      // Call OpenAI API
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
         temperature: 0.7,
+        response_format: { type: "json_object" },
         messages: [{
           role: 'user',
           content: `I have the following ingredients in my kitchen:
@@ -55,33 +55,34 @@ Please suggest 3-5 recipes I can make with these ingredients. For each recipe:
 3. It's okay if I'm missing minor ingredients like salt, pepper, oil - focus on main ingredients
 4. Include the recipe name, description, match percentage, and list of matched ingredients
 
-Format your response as a JSON array like this:
-[
-  {
-    "name": "Recipe Name",
-    "description": "Brief description",
-    "matchPercentage": 85,
-    "matchedIngredients": ["ingredient1", "ingredient2", "ingredient3"],
-    "missingIngredients": ["optional ingredient"],
-    "cookTime": "30 minutes",
-    "difficulty": "Easy"
-  }
-]
+Format your response as a JSON object with a "recipes" array like this:
+{
+  "recipes": [
+    {
+      "name": "Recipe Name",
+      "description": "Brief description",
+      "matchPercentage": 85,
+      "matchedIngredients": ["ingredient1", "ingredient2", "ingredient3"],
+      "missingIngredients": ["optional ingredient"],
+      "cookTime": "30 minutes",
+      "difficulty": "Easy"
+    }
+  ]
+}
 
-Return ONLY the JSON array, no other text.`
+Return ONLY valid JSON, no other text.`
         }]
       });
 
       // Parse the response
-      const responseText = message.content[0].text;
+      const responseText = completion.choices[0].message.content;
+      const data = JSON.parse(responseText);
 
-      // Extract JSON from the response (in case Claude adds any extra text)
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) {
-        throw new Error('Could not parse recipe suggestions from AI response');
+      if (!data.recipes || !Array.isArray(data.recipes)) {
+        throw new Error('Invalid recipe format from AI response');
       }
 
-      const recipes = JSON.parse(jsonMatch[0]);
+      const recipes = data.recipes;
 
       // Return the recipes
       return res.status(200).json({
