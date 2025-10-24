@@ -1,0 +1,38 @@
+<svg width="500" height="120" viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&amp;display=swap');
+    </style>
+    
+    <!-- Subtle gradient for depth -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d2d2d;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main text with custom spacing and styling -->
+  <g id="logo">
+    <!-- MISE in lighter weight -->
+    <text x="40" y="70" 
+          font-family="Inter, -apple-system, sans-serif" 
+          font-size="48" 
+          font-weight="300"
+          letter-spacing="8"
+          fill="url(#textGradient)">MISE</text>
+    
+    <!-- KITCHEN in regular weight with tighter spacing -->
+    <text x="215" y="70" 
+          font-family="Inter, -apple-system, sans-serif" 
+          font-size="48" 
+          font-weight="400"
+          letter-spacing="2"
+          fill="url(#textGradient)">KITCHEN</text>
+    
+    <!-- Vertical separator line between MISE and KITCHEN -->
+    <line x1="195" y1="35" x2="195" y2="75" 
+          stroke="#1a1a1a" 
+          stroke-width="1.5" 
+          opacity="0.6"/>
+  </g>
+</svg>
