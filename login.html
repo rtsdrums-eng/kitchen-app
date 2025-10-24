@@ -402,6 +402,10 @@
                 } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
                     // Wrong password - this is the key case
                     showLoading(false);
+                    document.getElementById('password').value = ''; // Clear password field
+                    document.getElementById('subtitle').textContent = ''; // Remove subtitle
+                    document.getElementById('email-form').style.display = 'none'; // Keep email form hidden
+                    document.getElementById('password-form').style.display = 'block'; // Keep password form visible
                     showError('Incorrect password. Please try again.');
                 } else if (error.code === 'auth/invalid-email') {
                     showLoading(false);
