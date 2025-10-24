@@ -360,6 +360,8 @@
                 await signInWithEmailAndPassword(auth, userEmail, password);
                 showSuccess('Logged in successfully!');
             } catch (error) {
+                console.log('Login error code:', error.code); // Debug logging
+
                 // Handle different error cases
                 if (error.code === 'auth/user-not-found') {
                     // User doesn't exist - create account
@@ -394,14 +396,14 @@
                     } catch (signupError) {
                         showLoading(false);
                         if (signupError.code === 'auth/email-already-in-use') {
-                            showError('Email already in use. Please use a different email.');
+                            showError('Incorrect password. Please try again.');
                         } else if (signupError.code === 'auth/weak-password') {
                             showError('Password is too weak. Please use at least 6 characters.');
                         } else {
                             showError('Error creating account: ' + signupError.message);
                         }
                     }
-                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
                     // Wrong password for existing account
                     showLoading(false);
                     showError('Incorrect password. Please try again.');
