@@ -2,6 +2,12 @@
 function loadNavbar() {
     const html = `<nav class="navbar">
     <div class="navbar-left">
+        <button class="icon-btn" onclick="history.back()" aria-label="Go back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
         <a href="index.html" class="navbar-brand-logo">
             <img src="misekitchen-logo.svg" alt="Mise Kitchen" class="navbar-logo">
         </a>
