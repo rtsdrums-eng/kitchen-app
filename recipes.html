@@ -405,7 +405,7 @@
 
             try {
                 // Call Cloud Function to generate quick recipe list
-                const response = await fetch('https://generaterecipelist-wdq5pd57fq-uc.a.run.app', {
+                const response = await fetch('https://us-central1-kitchen-app-48dfd.cloudfunctions.net/generateRecipeList', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -445,7 +445,7 @@
                 const detailsDiv = card.querySelector('.recipe-details');
                 detailsDiv.innerHTML = '<p style="text-align: center; padding: 20px;">Loading full recipe...</p>';
 
-                const response = await fetch('https://generaterecipedetails-wdq5pd57fq-uc.a.run.app', {
+                const response = await fetch('https://us-central1-kitchen-app-48dfd.cloudfunctions.net/generateRecipeDetails', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
