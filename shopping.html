@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="navbar-styles.css">
+    <link rel="stylesheet" href="list-styles.css?v=13">
     <script src="navbar-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
@@ -75,8 +76,6 @@
 
         .add-list-btn:hover {
             background: var(--orange-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .grid {
@@ -110,7 +109,7 @@
             align-items: center;
             margin-bottom: 16px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-grey);
+            border-bottom: 1px solid var(--light-grey);
         }
 
         .section-title-wrapper {
@@ -154,18 +153,17 @@
             font-size: 1.1rem;
             font-weight: 400;
             font-family: 'Inter', sans-serif;
-            border: 2px solid var(--orange);
-            border-radius: 6px;
-            padding: 6px 12px;
-            background: var(--white);
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            background: transparent;
             color: var(--black);
             outline: none;
             min-width: 200px;
         }
 
         .edit-store-name:focus {
-            border-color: var(--orange-hover);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            outline: none;
         }
 
         .section-actions {
@@ -207,27 +205,7 @@
             margin-bottom: 16px;
         }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 50px 12px 16px;
-            border: 2px solid var(--light-grey);
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-            background: var(--white);
-        }
-
-        input[type="text"]::placeholder {
-            font-size: 13px;
-            font-style: italic;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
+        /* Input styles moved to list-styles.css */
 
         .add-btn {
             position: absolute;
@@ -267,26 +245,50 @@
             text-decoration: underline;
         }
 
+        .show-more-btn {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            padding: 8px;
+            color: var(--medium-grey);
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: transparent;
+            border: none;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+        }
+
+        .show-more-btn:hover {
+            color: var(--black);
+        }
+
         ul {
             list-style: none;
         }
 
+        li.hidden-item {
+            display: none;
+        }
+
         li {
-            background: var(--white);
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            border-radius: 6px;
+            background: transparent;
+            padding: 10px 0;
+            margin-bottom: 0;
+            border-radius: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: all 0.2s;
-            border: 1px solid var(--light-grey);
+            border-bottom: 1px solid var(--light-grey);
             cursor: move;
         }
 
         li:hover {
-            border-color: var(--medium-grey);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-color: var(--light-grey);
         }
 
         li.sortable-ghost {
@@ -453,31 +455,7 @@
             transform: scale(1.1);
         }
 
-        .edit-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 2px solid var(--orange);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            min-width: 0;
-            width: 100%;
-        }
-
-        .edit-input:focus {
-            outline: none;
-            border-color: var(--orange-hover);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
-
-        li.editing {
-            flex-wrap: nowrap;
-        }
-
-        li.editing .item-content {
-            flex: 1;
-            gap: 8px;
-        }
+        /* Edit input styles moved to list-styles.css */
 
         .empty-state {
             color: var(--medium-grey);
@@ -519,18 +497,18 @@
             font-weight: 400;
             letter-spacing: -0.01em;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-grey);
+            border-bottom: 1px solid var(--light-grey);
         }
 
         .purchased-item {
-            background: var(--white);
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            border-radius: 6px;
+            background: transparent;
+            padding: 10px 0;
+            margin-bottom: 0;
+            border-radius: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--light-grey);
+            border-bottom: 1px solid var(--light-grey);
         }
 
         .purchased-content {
@@ -644,7 +622,7 @@
         </div>
 
         <div class="recently-purchased">
-            <h2>✓ Recently Purchased</h2>
+            <h2>Recently Purchased</h2>
             <ul id="purchased-list"></ul>
             <div id="purchased-empty" class="empty-state">No recently purchased items</div>
         </div>
@@ -678,9 +656,9 @@
 
         // Default store configurations
         const defaultStores = [
-            { id: 'heb', name: 'H-E-B', emoji: '🏪' },
-            { id: 'costco', name: 'Costco', emoji: '🏬' },
-            { id: 'other', name: 'Other Stores', emoji: '🏪' }
+            { id: 'heb', name: 'H-E-B', emoji: '◯' },
+            { id: 'costco', name: 'Costco', emoji: '◯' },
+            { id: 'other', name: 'Other Stores', emoji: '◯' }
         ];
 
         // Shopping data
@@ -688,10 +666,12 @@
         let storeOrder = stores.map(s => s.id);
         let shoppingList = {};
         let purchased = [];
+        let expandedSections = {}; // Track which sections are expanded
 
         // Initialize shopping lists for each store
         stores.forEach(store => {
             shoppingList[store.id] = [];
+            expandedSections[store.id] = false; // All sections start collapsed
         });
 
         // Example items to show when lists are empty
@@ -754,10 +734,13 @@
                     if (data.shoppingList) shoppingList = data.shoppingList;
                     if (data.purchased) purchased = data.purchased;
 
-                    // Ensure all stores have an array in shoppingList (fix for missing stores)
+                    // Ensure all stores have an array in shoppingList and expandedSections (fix for missing stores)
                     stores.forEach(store => {
                         if (!shoppingList[store.id]) {
                             shoppingList[store.id] = [];
+                        }
+                        if (expandedSections[store.id] === undefined) {
+                            expandedSections[store.id] = false;
                         }
                     });
                 } else {
@@ -767,6 +750,7 @@
                     shoppingList = {};
                     stores.forEach(store => {
                         shoppingList[store.id] = [];
+                        expandedSections[store.id] = false;
                     });
                     purchased = [];
                 }
@@ -832,10 +816,11 @@
             const name = prompt('Enter store name:');
             if (name && name.trim()) {
                 const id = 'store_' + Date.now();
-                const newStore = { id, name: name.trim(), emoji: '🏪' };
+                const newStore = { id, name: name.trim(), emoji: '◯' };
                 stores.push(newStore);
                 storeOrder.push(id);
                 shoppingList[id] = [];
+                expandedSections[id] = false;
 
                 await saveShoppingDataToFirebase();
             }
@@ -867,8 +852,9 @@
                         if (newName) {
                             store.name = newName;
                             await saveShoppingDataToFirebase();
+                            renderAllLists();
                         } else {
-                            renderSections();
+                            renderAllLists();
                         }
                     }
                 });
@@ -879,8 +865,9 @@
                     if (newName) {
                         store.name = newName;
                         await saveShoppingDataToFirebase();
+                        renderAllLists();
                     } else {
-                        renderSections();
+                        renderAllLists();
                     }
                 });
 
@@ -888,7 +875,7 @@
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         e.preventDefault();
-                        renderSections();
+                        renderAllLists();
                     }
                 });
             }
@@ -929,7 +916,16 @@
             if (item) {
                 shoppingList[storeId].unshift(item);
                 await saveShoppingDataToFirebase();
+                renderSection(storeId);
                 input.value = '';
+                // Refocus the input so user can quickly add another item
+                // Use setTimeout to ensure focus happens after Sortable initializes
+                setTimeout(() => {
+                    const refreshedInput = document.getElementById(`${storeId}-input`);
+                    if (refreshedInput) {
+                        refreshedInput.focus();
+                    }
+                }, 100);
             }
         }
         window.addItem = addItem;
@@ -947,42 +943,129 @@
         }
         window.editExampleItem = editExampleItem;
 
+        // Track current editing item to prevent race conditions
+        let currentlyEditing = null;
+
         // Edit item
         function editItem(storeId, index) {
+            const editKey = `${storeId}-${index}`;
+
+            // If we're already editing this item, do nothing
+            if (currentlyEditing === editKey) return;
+
+            // Mark that we're switching to edit this item
+            currentlyEditing = editKey;
+
             const item = shoppingList[storeId][index];
             const listItem = document.querySelector(`#${storeId}-list li:nth-child(${index + 1})`);
+            const itemText = listItem.querySelector('.item-text');
 
+            // If there's no item text (already an input), we're already editing
+            if (!itemText) return;
+
+            // Replace just the text span with an input
             listItem.classList.add('editing');
-            listItem.innerHTML = `
-                <div class="item-content">
-                    <input type="text" class="edit-input" value="${item}" id="edit-${storeId}-${index}">
-                </div>
-            `;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-input';
+            input.value = item;
+            input.id = `edit-${storeId}-${index}`;
 
-            // Focus the input and select all text
-            const input = document.getElementById(`edit-${storeId}-${index}`);
-            input.focus();
-            input.select();
+            itemText.replaceWith(input);
 
-            // Save on Enter key
-            input.addEventListener('keypress', (e) => {
+            // Prevent blur from firing immediately
+            let justCreated = true;
+            setTimeout(() => {
+                justCreated = false;
+            }, 200);
+
+            // Focus the input and place cursor at end
+            setTimeout(() => {
+                input.focus();
+                const length = input.value.length;
+                input.setSelectionRange(length, length);
+            }, 0);
+
+            // Save on Enter key and create new item if cursor at end
+            input.addEventListener('keypress', async (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    window.saveEdit(storeId, index);
+                    currentlyEditing = null;
+
+                    // Save current edit
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                        shoppingList[storeId][index] = newValue;
+                        await saveShoppingDataToFirebase();
+                    }
+
+                    // Add new blank item
+                    shoppingList[storeId].splice(index + 1, 0, '');
+                    await saveShoppingDataToFirebase();
+
+                    // Re-render
+                    renderSection(storeId);
+
+                    // Focus the new item after a brief delay
+                    setTimeout(() => {
+                        window.editItem(storeId, index + 1);
+                    }, 50);
                 }
             });
 
-            // Cancel on Escape key
+            // Handle Escape and arrow keys
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     e.preventDefault();
+                    currentlyEditing = null;
                     renderSection(storeId);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentlyEditing = null;
+                    // Save current item
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                        shoppingList[storeId][index] = newValue;
+                    }
+                    // Move to previous item if exists
+                    if (index > 0) {
+                        renderSection(storeId);
+                        setTimeout(() => {
+                            window.editItem(storeId, index - 1);
+                        }, 50);
+                    } else {
+                        renderSection(storeId);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentlyEditing = null;
+                    // Save current item
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                        shoppingList[storeId][index] = newValue;
+                    }
+                    // Move to next item if exists
+                    if (index < shoppingList[storeId].length - 1) {
+                        renderSection(storeId);
+                        setTimeout(() => {
+                            window.editItem(storeId, index + 1);
+                        }, 50);
+                    } else {
+                        renderSection(storeId);
+                    }
                 }
             });
 
-            // Save on blur (clicking away)
-            input.addEventListener('blur', () => {
-                window.saveEdit(storeId, index);
+            // Save on blur (clicking away) with delay to allow other clicks to register
+            input.addEventListener('blur', (e) => {
+                if (justCreated) return; // Ignore blur if just created
+                setTimeout(() => {
+                    // Only save if we're not switching to another item
+                    if (currentlyEditing === editKey) {
+                        currentlyEditing = null;
+                        window.saveEdit(storeId, index);
+                    }
+                }, 150);
             });
         }
         window.editItem = editItem;
@@ -1238,11 +1321,15 @@
         // Render a specific section
         function renderSection(storeId) {
             const list = document.getElementById(`${storeId}-list`);
-            const clearLink = document.getElementById(`${storeId}-clear`);
+            const showMoreContainer = document.getElementById(`${storeId}-show-more-container`);
 
-            if (!list || !clearLink) return;
+            if (!list || !showMoreContainer) return;
 
-            if (shoppingList[storeId].length === 0) {
+            const ITEMS_TO_SHOW = 7;
+            const isExpanded = expandedSections[storeId];
+            const totalItems = shoppingList[storeId].length;
+
+            if (totalItems === 0) {
                 // Show example items when empty - clicking them converts to real items
                 const examples = exampleItems[storeId] || ['Milk', 'Bread', 'Eggs'];
                 list.innerHTML = examples.map((item, index) => `
@@ -1257,29 +1344,49 @@
                         </div>
                     </li>
                 `).join('');
-                clearLink.style.display = 'none';
+                showMoreContainer.innerHTML = '';
             } else {
-                list.innerHTML = shoppingList[storeId].map((item, index) => `
-                    <li data-id="${index}">
-                        <div class="item-content">
-                            <span class="drag-handle">☰</span>
-                            <input type="checkbox" class="item-checkbox" onchange="window.checkItem('${storeId}', ${index})">
-                            <span class="item-text" onclick="window.editItem('${storeId}', ${index})">${item}</span>
-                        </div>
-                        <div class="item-buttons">
-                            <button class="menu-btn" onclick="window.toggleMenu(event, '${storeId}', ${index})">⋯</button>
-                            <div class="item-menu" id="menu-${storeId}-${index}">
-                                <button class="menu-option delete" onclick="window.deleteItem('${storeId}', ${index})">Delete</button>
+                // Render all items with hidden class for items beyond the limit
+                list.innerHTML = shoppingList[storeId].map((item, index) => {
+                    const isHidden = !isExpanded && index >= ITEMS_TO_SHOW;
+                    return `
+                        <li data-id="${index}" class="${isHidden ? 'hidden-item' : ''}">
+                            <div class="item-content">
+                                <span class="drag-handle">☰</span>
+                                <input type="checkbox" class="item-checkbox" onchange="window.checkItem('${storeId}', ${index})">
+                                <span class="item-text" onclick="window.editItem('${storeId}', ${index})">${item}</span>
                             </div>
-                        </div>
-                    </li>
-                `).join('');
-                clearLink.style.display = 'block';
+                            <div class="item-buttons">
+                                <button class="menu-btn" onclick="window.toggleMenu(event, '${storeId}', ${index})">⋯</button>
+                                <div class="item-menu" id="menu-${storeId}-${index}">
+                                    <button class="menu-option delete" onclick="window.deleteItem('${storeId}', ${index})">Delete</button>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+
+                // Show "Show more" button if there are more than 7 items
+                if (totalItems > ITEMS_TO_SHOW) {
+                    const hiddenCount = totalItems - ITEMS_TO_SHOW;
+                    showMoreContainer.innerHTML = isExpanded
+                        ? `<button class="show-more-btn" onclick="window.toggleShowMore('${storeId}')">Show less</button>`
+                        : `<button class="show-more-btn" onclick="window.toggleShowMore('${storeId}')">Show ${hiddenCount} more</button>`;
+                } else {
+                    showMoreContainer.innerHTML = '';
+                }
 
                 // Initialize Sortable for this list
                 initializeSortable(storeId);
             }
         }
+
+        // Toggle show more/less
+        function toggleShowMore(storeId) {
+            expandedSections[storeId] = !expandedSections[storeId];
+            renderSection(storeId);
+        }
+        window.toggleShowMore = toggleShowMore;
 
         // Toggle menu
         function toggleMenu(event, storeId, index) {
@@ -1342,6 +1449,7 @@
         // Render all store lists
         function renderAllLists() {
             const container = document.getElementById('lists-container');
+            if (!container) return;
             container.innerHTML = '';
 
             storeOrder.forEach(storeId => {
@@ -1362,7 +1470,7 @@
                 section.innerHTML = `
                     <div class="section-header" onclick="window.toggleSection(this)">
                         <div class="section-title-wrapper">
-                            <h2 onclick="event.stopPropagation(); window.renameStore('${storeId}')" style="cursor: pointer;">${store.emoji} ${store.name}</h2>
+                            <h2 onclick="event.stopPropagation(); window.renameStore('${storeId}')" style="cursor: pointer;">${store.name}</h2>
                         </div>
                         <div class="section-actions">
                             <span class="collapse-icon">▼</span>
@@ -1375,7 +1483,7 @@
                             <button class="add-btn" onclick="window.addItem('${storeId}')">+</button>
                         </div>
                         <ul id="${storeId}-list"></ul>
-                        <a href="#" class="clear-link" id="${storeId}-clear" onclick="window.clearSection('${storeId}'); return false;">clear all items</a>
+                        <div id="${storeId}-show-more-container"></div>
                     </div>
                 `;
 

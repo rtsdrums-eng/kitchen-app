@@ -1,0 +1,321 @@
+/* Shared styles for shopping and inventory list pages */
+
+.section {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+    margin-bottom: 32px;
+}
+
+.section:hover {
+    box-shadow: none;
+}
+
+.section h2 {
+    color: var(--black);
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+/* Clean, minimal text inputs - no boxes */
+input[type="text"] {
+    width: 100%;
+    padding: 8px 0;
+    border: none;
+    border-radius: 0;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    background: transparent;
+    color: var(--black);
+}
+
+input[type="text"]::placeholder {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--medium-grey);
+}
+
+input[type="text"]:focus {
+    outline: none;
+}
+
+/* Edit inputs - completely invisible inline editing */
+input.edit-input {
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    min-width: 0;
+    width: auto;
+    color: var(--black);
+}
+
+input.edit-input:focus {
+    outline: none;
+}
+
+.add-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    color: var(--black);
+    border: none;
+    padding: 8px;
+    font-size: 20px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.5;
+}
+
+.add-btn:hover {
+    opacity: 1;
+}
+
+.clear-link {
+    display: block;
+    text-align: left;
+    margin-top: 12px;
+    color: var(--medium-grey);
+    font-size: 11px;
+    font-style: italic;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.clear-link:hover {
+    color: var(--black);
+    text-decoration: underline;
+}
+
+.show-more-btn {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    padding: 8px;
+    color: var(--medium-grey);
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: transparent;
+    border: none;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+.show-more-btn:hover {
+    color: var(--black);
+}
+
+ul {
+    list-style: none;
+}
+
+li.hidden-item {
+    display: none;
+}
+
+li {
+    background: transparent;
+    padding: 10px 0;
+    margin-bottom: 0;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--light-grey);
+    cursor: move;
+}
+
+li:hover {
+    border-color: var(--light-grey);
+}
+
+li.sortable-ghost {
+    opacity: 0.4;
+    background: var(--orange-light);
+    border-top: 3px solid var(--orange);
+    border-bottom: 3px solid var(--orange);
+}
+
+li.sortable-ghost::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -3px;
+    height: 3px;
+    background: var(--orange);
+}
+
+li.sortable-drag {
+    opacity: 0.9;
+    cursor: grabbing;
+}
+
+.drag-handle {
+    color: var(--medium-grey);
+    font-size: 16px;
+    cursor: grab;
+    padding: 0 8px;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.item-text {
+    font-size: 14px;
+    color: var(--black);
+    font-weight: 300;
+    cursor: pointer;
+    flex: 1;
+}
+
+.item-text:hover {
+    color: var(--orange);
+}
+
+.item-buttons {
+    display: flex;
+    gap: 0px;
+    position: relative;
+}
+
+.menu-btn {
+    background: transparent;
+    color: var(--medium-grey);
+    padding: 6px 10px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.menu-btn:hover {
+    opacity: 1;
+    color: var(--orange);
+}
+
+.item-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: var(--white);
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 100;
+    min-width: 120px;
+    margin-top: 4px;
+}
+
+.item-menu.show {
+    display: block;
+}
+
+.menu-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--black);
+    font-size: 14px;
+    transition: background 0.2s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.menu-option:hover {
+    background: var(--orange-light);
+}
+
+.menu-option.delete {
+    color: #dc3545;
+}
+
+.menu-option.delete:hover {
+    background: #fff5f5;
+}
+
+/* Duplicate edit-input styles removed - see above */
+
+.empty-state {
+    color: var(--medium-grey);
+    font-style: italic;
+    text-align: center;
+    padding: 24px;
+    font-size: 14px;
+}
+
+.example-item {
+    opacity: 0.4;
+    font-style: italic;
+    color: var(--medium-grey);
+}
+
+.example-item .item-text {
+    cursor: default;
+}
+
+.example-item .drag-handle,
+.example-item .delete-btn {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.collapse-icon {
+    color: var(--medium-grey);
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.section.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.section.collapsed .section-content {
+    display: none;
+}
+
+/* Hide collapse icon on larger screens */
+@media (min-width: 769px) {
+    .collapse-icon {
+        display: none;
+    }
+}

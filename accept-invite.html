@@ -121,7 +121,6 @@
         input[type="password"]:focus {
             outline: none;
             border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         }
 
         input[type="email"]:disabled {
@@ -149,8 +148,6 @@
 
         .btn-primary:hover {
             background: var(--orange-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .btn-primary:disabled {
@@ -160,14 +157,16 @@
         }
 
         .error-message {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c00;
-            padding: 12px;
+            background: var(--orange-light);
+            border: 1px solid var(--orange);
+            color: var(--black);
+            padding: 14px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 400;
             display: none;
+            text-align: center;
         }
 
         .error-message.show {
@@ -282,7 +281,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
@@ -300,7 +299,6 @@
 
         let invitationId = null;
         let invitationData = null;
-        let userExists = false;
         let isProcessing = false;
 
         // Get invitation ID from URL
@@ -324,36 +322,23 @@
                 }
 
                 invitationData = inviteDoc.data();
+                console.log('Invitation data:', invitationData);
 
                 if (invitationData.status !== 'pending') {
                     showError('This invitation has already been ' + invitationData.status);
                     return;
                 }
 
-                // Display invitation message
+                // Display invitation message - always show signup form by default
                 document.getElementById('subtitle').textContent = '';
                 const messageElement = document.getElementById('invitation-message');
                 messageElement.innerHTML = `You've been invited to join the household <em>${invitationData.householdName}</em>. Create a password to get started!`;
 
-                // Check if user exists
-                const usersQuery = query(collection(db, 'users'), where('email', '==', invitationData.inviteeEmail));
-                const usersSnapshot = await getDocs(usersQuery);
-                userExists = !usersSnapshot.empty;
-
-                // Show appropriate form
+                // Show signup form by default
                 document.getElementById('loading').classList.remove('show');
                 document.getElementById('invitation-content').style.display = 'block';
-
-                if (userExists) {
-                    // Show login form - update message
-                    messageElement.innerHTML = `You've been invited to join the household <em>${invitationData.householdName}</em>. Log in to accept!`;
-                    document.getElementById('login-email').value = invitationData.inviteeEmail;
-                    document.getElementById('login-form').style.display = 'block';
-                } else {
-                    // Show signup form
-                    document.getElementById('signup-email').value = invitationData.inviteeEmail;
-                    document.getElementById('signup-form').style.display = 'block';
-                }
+                document.getElementById('signup-email').value = invitationData.inviteeEmail;
+                document.getElementById('signup-form').style.display = 'block';
             } catch (error) {
                 showError('Error loading invitation: ' + error.message);
             }
@@ -361,6 +346,8 @@
 
         window.switchToLogin = function() {
             document.getElementById('signup-form').style.display = 'none';
+            const messageElement = document.getElementById('invitation-message');
+            messageElement.innerHTML = `You've been invited to join the household <em>${invitationData.householdName}</em>. Log in to accept!`;
             document.getElementById('login-email').value = invitationData.inviteeEmail;
             document.getElementById('login-form').style.display = 'block';
         };
@@ -403,12 +390,18 @@
                 return;
             }
 
+            if (!invitationData || !invitationData.inviteeEmail) {
+                showError('Invalid invitation data. Please try the invitation link again.');
+                return;
+            }
+
             if (isProcessing) return;
             isProcessing = true;
 
             showLoading(true);
 
             try {
+                console.log('Attempting signup with email:', invitationData.inviteeEmail);
                 const userCredential = await createUserWithEmailAndPassword(auth, invitationData.inviteeEmail, password);
                 const user = userCredential.user;
 
@@ -439,8 +432,11 @@
             } catch (error) {
                 isProcessing = false;
                 showLoading(false);
+                console.error('Signup error:', error);
                 if (error.code === 'auth/email-already-in-use') {
                     showError('An account with this email already exists. Please log in instead.');
+                } else if (error.code === 'auth/invalid-email') {
+                    showError('Invalid email address: ' + invitationData.inviteeEmail);
                 } else {
                     showError('Signup failed: ' + error.message);
                 }

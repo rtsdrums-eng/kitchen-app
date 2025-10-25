@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="navbar-styles.css">
+    <link rel="stylesheet" href="list-styles.css?v=13">
     <script src="navbar-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
@@ -80,7 +81,7 @@
             font-weight: 400;
             letter-spacing: -0.01em;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-grey);
+            border-bottom: 1px solid var(--light-grey);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -117,27 +118,7 @@
             margin-bottom: 16px;
         }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 50px 12px 16px;
-            border: 2px solid var(--light-grey);
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-            background: var(--white);
-        }
-
-        input[type="text"]::placeholder {
-            font-size: 13px;
-            font-style: italic;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
+        /* Input styles moved to list-styles.css */
 
         .add-btn {
             position: absolute;
@@ -177,26 +158,50 @@
             text-decoration: underline;
         }
 
+        .show-more-btn {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            padding: 8px;
+            color: var(--medium-grey);
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: transparent;
+            border: none;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+        }
+
+        .show-more-btn:hover {
+            color: var(--black);
+        }
+
         ul {
             list-style: none;
         }
 
+        li.hidden-item {
+            display: none;
+        }
+
         li {
-            background: var(--white);
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            border-radius: 6px;
+            background: transparent;
+            padding: 10px 0;
+            margin-bottom: 0;
+            border-radius: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: all 0.2s;
-            border: 1px solid var(--light-grey);
+            border-bottom: 1px solid var(--light-grey);
             cursor: move;
         }
 
         li:hover {
-            border-color: var(--medium-grey);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-color: var(--light-grey);
         }
 
         li.sortable-ghost {
@@ -347,40 +352,7 @@
             transform: scale(1.15);
         }
 
-        .edit-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 2px solid var(--orange);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            min-width: 0;
-            width: 100%;
-        }
-
-        .edit-input:focus {
-            outline: none;
-            border-color: var(--orange-hover);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
-
-        li.editing {
-            flex-wrap: nowrap;
-        }
-
-        li.editing .item-content {
-            flex: 1;
-            gap: 8px;
-        }
-
-        li.editing .edit-input {
-            flex: 1;
-            min-width: 100px;
-        }
-
-        li.editing .item-buttons {
-            flex-shrink: 0;
-        }
+        /* Edit input styles moved to list-styles.css */
 
         .empty-state {
             color: var(--medium-grey);
@@ -624,7 +596,7 @@
             <div class="section refrigerator">
                 <h2 onclick="toggleSection(this)">
                     <div class="section-title-left">
-                        <span class="section-icon">🧊</span> Refrigerator
+                        Refrigerator
                         <span class="count-badge" id="fridge-count">0</span>
                     </div>
                     <span class="collapse-icon">▼</span>
@@ -635,14 +607,14 @@
                         <button class="add-btn" onclick="addItem('fridge')">+</button>
                     </div>
                     <ul id="fridge-list"></ul>
-                    <a href="#" class="clear-link" id="fridge-clear" onclick="window.clearSection('fridge'); return false;">clear all items</a>
+                    <div id="fridge-show-more-container"></div>
                 </div>
             </div>
 
             <div class="section freezer">
                 <h2 onclick="toggleSection(this)">
                     <div class="section-title-left">
-                        <span class="section-icon">❄️</span> Freezer
+                        Freezer
                         <span class="count-badge" id="freezer-count">0</span>
                     </div>
                     <span class="collapse-icon">▼</span>
@@ -653,14 +625,14 @@
                         <button class="add-btn" onclick="addItem('freezer')">+</button>
                     </div>
                     <ul id="freezer-list"></ul>
-                    <a href="#" class="clear-link" id="freezer-clear" onclick="window.clearSection('freezer'); return false;">clear all items</a>
+                    <div id="freezer-show-more-container"></div>
                 </div>
             </div>
 
             <div class="section pantry">
                 <h2 onclick="toggleSection(this)">
                     <div class="section-title-left">
-                        <span class="section-icon">🥫</span> Pantry
+                        Pantry
                         <span class="count-badge" id="pantry-count">0</span>
                     </div>
                     <span class="collapse-icon">▼</span>
@@ -671,14 +643,14 @@
                         <button class="add-btn" onclick="addItem('pantry')">+</button>
                     </div>
                     <ul id="pantry-list"></ul>
-                    <a href="#" class="clear-link" id="pantry-clear" onclick="window.clearSection('pantry'); return false;">clear all items</a>
+                    <div id="pantry-show-more-container"></div>
                 </div>
             </div>
 
             <div class="section spices">
                 <h2 onclick="toggleSection(this)">
                     <div class="section-title-left">
-                        <span class="section-icon">🌶️</span> Spice Cabinet
+                        Spice Cabinet
                         <span class="count-badge" id="spices-count">0</span>
                     </div>
                     <span class="collapse-icon">▼</span>
@@ -689,7 +661,7 @@
                         <button class="add-btn" onclick="addItem('spices')">+</button>
                     </div>
                     <ul id="spices-list"></ul>
-                    <a href="#" class="clear-link" id="spices-clear" onclick="window.clearSection('spices'); return false;">clear all items</a>
+                    <div id="spices-show-more-container"></div>
                 </div>
             </div>
         </div>
@@ -741,6 +713,12 @@
             freezer: [],
             pantry: [],
             spices: []
+        };
+        let expandedSections = {
+            fridge: false,
+            freezer: false,
+            pantry: false,
+            spices: false
         };
 
         // Example items to show when sections are empty
@@ -897,47 +875,137 @@
             if (item) {
                 inventory[section].unshift(item);
                 await saveInventoryToFirebase();
+                renderSection(section);
                 input.value = '';
+                // Refocus the input so user can quickly add another item
+                input.focus();
             }
         }
         window.addItem = addItem;
 
+        // Track current editing item to prevent race conditions
+        let currentlyEditing = null;
+
         // Edit item
         function editItem(section, index) {
+            const editKey = `${section}-${index}`;
+
+            // If we're already editing this item, do nothing
+            if (currentlyEditing === editKey) return;
+
+            // Mark that we're switching to edit this item
+            currentlyEditing = editKey;
+
             const item = inventory[section][index];
             const listItem = document.querySelector(`#${section}-list li:nth-child(${index + 1})`);
+            const itemText = listItem.querySelector('.item-text');
 
+            // If there's no item text (already an input), we're already editing
+            if (!itemText) return;
+
+            // Replace just the text span with an input
             listItem.classList.add('editing');
-            listItem.innerHTML = `
-                <div class="item-content">
-                    <input type="text" class="edit-input" value="${item}" id="edit-${section}-${index}">
-                </div>
-            `;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-input';
+            input.value = item;
+            input.id = `edit-${section}-${index}`;
 
-            // Focus the input and select all text
-            const input = document.getElementById(`edit-${section}-${index}`);
-            input.focus();
-            input.select();
+            itemText.replaceWith(input);
 
-            // Save on Enter key
-            input.addEventListener('keypress', (e) => {
+            // Prevent blur from firing immediately
+            let justCreated = true;
+            setTimeout(() => {
+                justCreated = false;
+            }, 200);
+
+            // Focus the input and place cursor at end
+            setTimeout(() => {
+                input.focus();
+                const length = input.value.length;
+                input.setSelectionRange(length, length);
+            }, 0);
+
+            // Save on Enter key and create new item if cursor at end
+            input.addEventListener('keypress', async (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    window.saveEdit(section, index);
+                    currentlyEditing = null;
+
+                    // Save current edit
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                        inventory[section][index] = newValue;
+                        await saveInventoryDataToFirebase();
+                    }
+
+                    // Add new blank item
+                    inventory[section].splice(index + 1, 0, '');
+                    await saveInventoryDataToFirebase();
+
+                    // Re-render
+                    renderSection(section);
+
+                    // Focus the new item after a brief delay
+                    setTimeout(() => {
+                        window.editItem(section, index + 1);
+                    }, 50);
                 }
             });
 
-            // Cancel on Escape key
+            // Handle Escape and arrow keys
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     e.preventDefault();
+                    currentlyEditing = null;
                     window.cancelEdit(section);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentlyEditing = null;
+                    // Save current item
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                        inventory[section][index] = newValue;
+                    }
+                    // Move to previous item if exists
+                    if (index > 0) {
+                        renderSection(section);
+                        setTimeout(() => {
+                            window.editItem(section, index - 1);
+                        }, 50);
+                    } else {
+                        renderSection(section);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentlyEditing = null;
+                    // Save current item
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                        inventory[section][index] = newValue;
+                    }
+                    // Move to next item if exists
+                    if (index < inventory[section].length - 1) {
+                        renderSection(section);
+                        setTimeout(() => {
+                            window.editItem(section, index + 1);
+                        }, 50);
+                    } else {
+                        renderSection(section);
+                    }
                 }
             });
 
-            // Save on blur (clicking away)
-            input.addEventListener('blur', () => {
-                window.saveEdit(section, index);
+            // Save on blur (clicking away) with delay to allow other clicks to register
+            input.addEventListener('blur', (e) => {
+                if (justCreated) return; // Ignore blur if just created
+                setTimeout(() => {
+                    // Only save if we're not switching to another item
+                    if (currentlyEditing === editKey) {
+                        currentlyEditing = null;
+                        window.saveEdit(section, index);
+                    }
+                }, 150);
             });
         }
         window.editItem = editItem;
@@ -1022,9 +1090,15 @@
         // Render a specific section
         function renderSection(section) {
             const list = document.getElementById(`${section}-list`);
-            const clearLink = document.getElementById(`${section}-clear`);
+            const showMoreContainer = document.getElementById(`${section}-show-more-container`);
 
-            if (inventory[section].length === 0) {
+            if (!list || !showMoreContainer) return;
+
+            const ITEMS_TO_SHOW = 7;
+            const isExpanded = expandedSections[section];
+            const totalItems = inventory[section].length;
+
+            if (totalItems === 0) {
                 // Show example items when empty - clicking them converts to real items
                 list.innerHTML = exampleItems[section].map((item, index) => `
                     <li class="example-item" data-id="${index}">
@@ -1037,28 +1111,51 @@
                         </div>
                     </li>
                 `).join('');
-                clearLink.style.display = 'none';
+                showMoreContainer.innerHTML = '';
             } else {
-                list.innerHTML = inventory[section].map((item, index) => `
-                    <li data-id="${index}">
-                        <div class="item-content">
-                            <span class="drag-handle">☰</span>
-                            <span class="item-text" onclick="window.editItem('${section}', ${index})">${item}</span>
-                        </div>
-                        <div class="item-buttons">
-                            <button class="menu-btn" onclick="window.toggleMenu(event, '${section}', ${index})">⋯</button>
-                            <div class="item-menu" id="menu-${section}-${index}">
-                                <button class="menu-option delete" onclick="window.deleteItem('${section}', ${index})">Delete</button>
+                // Render all items with hidden class for items beyond the limit
+                list.innerHTML = inventory[section].map((item, index) => {
+                    const isHidden = !isExpanded && index >= ITEMS_TO_SHOW;
+                    return `
+                        <li data-id="${index}" class="${isHidden ? 'hidden-item' : ''}">
+                            <div class="item-content">
+                                <span class="drag-handle">☰</span>
+                                <span class="item-text" onclick="window.editItem('${section}', ${index})">${item}</span>
                             </div>
-                        </div>
-                    </li>
-                `).join('');
-                clearLink.style.display = 'block';
+                            <div class="item-buttons">
+                                <button class="menu-btn" onclick="window.toggleMenu(event, '${section}', ${index})">⋯</button>
+                                <div class="item-menu" id="menu-${section}-${index}">
+                                    <button class="menu-option delete" onclick="window.deleteItem('${section}', ${index})">Delete</button>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+
+                // Show "Show more" button if there are more than 7 items
+                if (totalItems > ITEMS_TO_SHOW) {
+                    const hiddenCount = totalItems - ITEMS_TO_SHOW;
+                    showMoreContainer.innerHTML = isExpanded
+                        ? `<button class="show-more-btn" onclick="window.toggleShowMore('${section}')">Show less</button>`
+                        : `<button class="show-more-btn" onclick="window.toggleShowMore('${section}')">Show ${hiddenCount} more</button>`;
+                } else {
+                    showMoreContainer.innerHTML = '';
+                }
 
                 // Initialize Sortable for this list
                 initializeSortable(section);
             }
+
+            // Update the count badge
+            updateStats();
         }
+
+        // Toggle show more/less
+        function toggleShowMore(section) {
+            expandedSections[section] = !expandedSections[section];
+            renderSection(section);
+        }
+        window.toggleShowMore = toggleShowMore;
 
         // Toggle menu
         function toggleMenu(event, section, index) {

@@ -63,7 +63,7 @@
             text-align: center;
             color: var(--medium-grey);
             margin-bottom: 30px;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
         }
 
         .form-group {
@@ -94,7 +94,6 @@
         input[type="password"]:focus {
             outline: none;
             border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         }
 
         .btn {
@@ -117,8 +116,6 @@
 
         .btn-primary:hover {
             background: var(--orange-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .btn-secondary {
@@ -159,14 +156,16 @@
         }
 
         .error-message {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c00;
-            padding: 12px;
+            background: var(--orange-light);
+            border: 1px solid var(--orange);
+            color: var(--black);
+            padding: 14px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 400;
             display: none;
+            text-align: center;
         }
 
         .error-message.show {
@@ -213,8 +212,10 @@
 <body>
     <div class="container">
         <div class="login-box">
-            <h1>Mise Kitchen</h1>
-            <p class="subtitle" id="subtitle">Sign in or create an account to get started</p>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="misekitchen-logo.svg" alt="Mise Kitchen" style="height: 60px;">
+            </div>
+            <p class="subtitle" id="subtitle">Welcome to Mise Kitchen, please enter your email to create an account or sign in.</p>
 
             <div id="error-message" class="error-message"></div>
             <div id="success-message" class="success-message"></div>
@@ -222,7 +223,6 @@
 
             <div id="email-form">
                 <div class="form-group">
-                    <label for="email">Email</label>
                     <input type="email" id="email" placeholder="you@example.com" required>
                 </div>
 
@@ -244,8 +244,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
@@ -261,7 +261,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let userExists = false;
         let userEmail = '';
 
         // Check if user is already logged in
@@ -297,7 +296,7 @@
             document.getElementById('password-form').style.display = show ? 'none' : 'block';
         }
 
-        // Step 1: Check if user exists in Firestore
+        // Step 1: Just capture email and show password form
         window.handleContinue = async function() {
             const email = document.getElementById('email').value.trim().toLowerCase();
 
@@ -306,43 +305,22 @@
                 return;
             }
 
-            showLoading(true);
+            // Just save the email and show password form
+            // We'll determine if it's login or signup when they submit
+            userEmail = email;
 
-            try {
-                // Check Firestore for existing user
-                const usersQuery = query(collection(db, 'users'), where('email', '==', email));
-                const usersSnapshot = await getDocs(usersQuery);
-                userExists = !usersSnapshot.empty;
-                userEmail = email;
+            document.getElementById('email-form').style.display = 'none';
+            document.getElementById('password-form').style.display = 'block';
 
-                // Show password form
-                showLoading(false);
-                document.getElementById('email-form').style.display = 'none';
-                document.getElementById('password-form').style.display = 'block';
+            // Welcome back message
+            document.getElementById('subtitle').textContent = 'Welcome back, please enter your password.';
+            document.getElementById('password-label').textContent = 'Password';
+            document.getElementById('password').placeholder = 'Enter your password';
+            document.getElementById('password-hint').style.display = 'none';
+            document.getElementById('submit-btn').textContent = 'Continue';
 
-                if (userExists) {
-                    // Existing user - login
-                    document.getElementById('subtitle').textContent = 'Welcome back!';
-                    document.getElementById('password-label').textContent = 'Password';
-                    document.getElementById('password').placeholder = 'Enter your password';
-                    document.getElementById('password-hint').style.display = 'none';
-                    document.getElementById('submit-btn').textContent = 'Log In';
-                } else {
-                    // New user - signup
-                    document.getElementById('subtitle').textContent = 'Create your account';
-                    document.getElementById('password-label').textContent = 'Create Password';
-                    document.getElementById('password').placeholder = 'At least 6 characters';
-                    document.getElementById('password-hint').style.display = 'block';
-                    document.getElementById('submit-btn').textContent = 'Create Account';
-                }
-
-                // Focus password field
-                document.getElementById('password').focus();
-            } catch (error) {
-                showLoading(false);
-                showError('Error checking email. Please try again.');
-                console.error('Email check error:', error);
-            }
+            // Focus password field
+            document.getElementById('password').focus();
         };
 
         // Step 2: Try to login first, create account if user not found
@@ -354,18 +332,15 @@
                 return;
             }
 
-            showLoading(true);
-
             try {
                 // Always try to sign in first
                 await signInWithEmailAndPassword(auth, userEmail, password);
-                showSuccess('Logged in successfully!');
+                // Don't show loading or success - redirect will happen immediately via onAuthStateChanged
             } catch (error) {
                 // If sign in fails, determine why
                 if (error.code === 'auth/user-not-found') {
                     // User doesn't exist - create new account
                     if (password.length < 6) {
-                        showLoading(false);
                         showError('Password must be at least 6 characters');
                         return;
                     }
@@ -390,10 +365,8 @@
                             createdAt: new Date().toISOString()
                         });
 
-                        showSuccess('Account created successfully!');
-                        // Redirect will happen via onAuthStateChanged
+                        // Don't show success message - redirect will happen via onAuthStateChanged
                     } catch (signupError) {
-                        showLoading(false);
                         if (signupError.code === 'auth/weak-password') {
                             showError('Password is too weak. Please use at least 6 characters.');
                         } else {
@@ -402,17 +375,14 @@
                     }
                 } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
                     // Wrong password - this is the key case
-                    showLoading(false);
                     document.getElementById('password').value = ''; // Clear password field
                     document.getElementById('subtitle').textContent = ''; // Remove subtitle
                     document.getElementById('email-form').style.display = 'none'; // Keep email form hidden
                     document.getElementById('password-form').style.display = 'block'; // Keep password form visible
                     showError('Incorrect password. Please try again.');
                 } else if (error.code === 'auth/invalid-email') {
-                    showLoading(false);
                     showError('Invalid email address');
                 } else {
-                    showLoading(false);
                     showError('Error: ' + error.message);
                 }
             }
@@ -423,7 +393,7 @@
             hideError();
             document.getElementById('password-form').style.display = 'none';
             document.getElementById('email-form').style.display = 'block';
-            document.getElementById('subtitle').textContent = 'Sign in or create an account to get started';
+            document.getElementById('subtitle').textContent = 'Welcome to Mise Kitchen, please enter your email to create an account or sign in.';
             document.getElementById('password').value = '';
             document.getElementById('email').focus();
         };

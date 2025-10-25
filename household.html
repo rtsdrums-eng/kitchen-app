@@ -92,7 +92,7 @@
         .household-name input:focus {
             outline: none;
             border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            box-shadow: 0 0 0 3px rgba(190, 197, 164, 0.15);
         }
 
         .btn {
@@ -109,12 +109,6 @@
         .btn-primary {
             background: var(--orange);
             color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: var(--orange-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .btn-secondary {
@@ -202,7 +196,7 @@
         .invite-form input:focus {
             outline: none;
             border-color: var(--orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            box-shadow: 0 0 0 3px rgba(190, 197, 164, 0.15);
         }
 
         .empty-state {
@@ -619,6 +613,13 @@
 
             if (!email) {
                 showMessage('Please enter an email address', 'error');
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('Please enter a valid email address', 'error');
                 return;
             }
 
