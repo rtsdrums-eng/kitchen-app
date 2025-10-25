@@ -281,7 +281,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDARcrvn9kx6F47f4Uc2Ypd2ikQRANwX7A",
@@ -405,25 +405,23 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, invitationData.inviteeEmail, password);
                 const user = userCredential.user;
 
-                // Don't create a new household - will join the invited household
-                // Just create user document with the invited household ID
-                await setDoc(doc(db, 'users', user.uid), {
-                    email: user.email,
-                    householdId: invitationData.householdId,
-                    createdAt: new Date().toISOString()
+                // Call Cloud Function to handle invitation acceptance with admin privileges
+                const response = await fetch('https://us-central1-kitchen-app-48dfd.cloudfunctions.net/acceptInvitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        invitationId: invitationId,
+                        userId: user.uid
+                    })
                 });
 
-                // Add user to the household
-                await updateDoc(doc(db, 'households', invitationData.householdId), {
-                    members: arrayUnion(user.uid)
-                });
+                const result = await response.json();
 
-                // Update invitation
-                await updateDoc(doc(db, 'invitations', invitationId), {
-                    inviteeId: user.uid,
-                    status: 'accepted',
-                    acceptedAt: new Date().toISOString()
-                });
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to accept invitation');
+                }
 
                 showSuccess('Account created and invitation accepted! Redirecting...');
                 setTimeout(() => {
@@ -461,30 +459,23 @@
             try {
                 showLoading(true);
 
-                // Get user's current household
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                const currentHouseholdId = userDoc.data().householdId;
-
-                // Remove from current household
-                await updateDoc(doc(db, 'households', currentHouseholdId), {
-                    members: arrayRemove(user.uid)
+                // Call Cloud Function to handle invitation acceptance with admin privileges
+                const response = await fetch('https://us-central1-kitchen-app-48dfd.cloudfunctions.net/acceptInvitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        invitationId: invitationId,
+                        userId: user.uid
+                    })
                 });
 
-                // Add to new household
-                await updateDoc(doc(db, 'households', invitationData.householdId), {
-                    members: arrayUnion(user.uid)
-                });
+                const result = await response.json();
 
-                // Update user document
-                await updateDoc(doc(db, 'users', user.uid), {
-                    householdId: invitationData.householdId
-                });
-
-                // Update invitation
-                await updateDoc(doc(db, 'invitations', invitationId), {
-                    status: 'accepted',
-                    acceptedAt: new Date().toISOString()
-                });
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to accept invitation');
+                }
 
                 showSuccess('Invitation accepted! Redirecting...');
                 setTimeout(() => {
